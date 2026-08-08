@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://eazar86-eng.github.io/-azars-travel-journal/sitemap.xml
+Sitemap: https://azarstravel.com/sitemap.xml
