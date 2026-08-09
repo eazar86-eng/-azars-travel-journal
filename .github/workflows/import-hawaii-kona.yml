@@ -1,0 +1,38 @@
+name: Import Hawaii Kona photos
+on:
+  push:
+    paths:
+      - '.github/workflows/import-hawaii-kona.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Download
+        run: |
+          mkdir -p assets/summer-2026/hawaii-kona
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-038c-81fd-a138-289350ee1898/raw?se=2026-08-09T03%3A22%3A06Z&sp=r&sv=2026-02-06&sr=b&scid=40dd68c5-708f-51d5-9ae0-4abc35239057&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A52%3A12Z&ske=2026-08-10T02%3A52%3A12Z&sks=b&skv=2026-02-06&sig=DxieOMlXDLlK9Hsj8f1iVF4mP5QikbwDHppNWjhzYnM%3D' -o assets/summer-2026/hawaii-kona/01.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-094c-81fd-b654-40593581ccec/raw?se=2026-08-09T03%3A22%3A15Z&sp=r&sv=2026-02-06&sr=b&scid=8fddc825-d641-5b51-b26c-952cf7132a6c&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T14%3A36%3A50Z&ske=2026-08-09T14%3A36%3A50Z&sks=b&skv=2026-02-06&sig=EA5tL9wJnV406ydFZA2OgrxlrmrdVwdUKVvoK0bR5Xk%3D' -o assets/summer-2026/hawaii-kona/02.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-5a8c-81fd-a1af-8b4d4d10ca17/raw?se=2026-08-09T03%3A22%3A19Z&sp=r&sv=2026-02-06&sr=b&scid=64bd4883-70f4-5078-a742-3ac006a5c672&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A48%3A51Z&ske=2026-08-10T02%3A48%3A51Z&sks=b&skv=2026-02-06&sig=FwffgJXW2w9hWEArhZEdLXk8vxqHYWcDZhgpF9hewGM%3D' -o assets/summer-2026/hawaii-kona/03.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-dc28-81fd-ad93-3c6db62219ef/raw?se=2026-08-09T03%3A22%3A22Z&sp=r&sv=2026-02-06&sr=b&scid=e1e6fd9c-28e0-5272-a35c-4519af8d6fbb&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A39%3A26Z&ske=2026-08-10T02%3A39%3A26Z&sks=b&skv=2026-02-06&sig=Np%2B5qvd0jQr7y7mWKzzf670IiB8/QWFgNP1jBj5T3%2B0%3D' -o assets/summer-2026/hawaii-kona/04.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-cd84-81fd-a252-d87d7f340669/raw?se=2026-08-09T03%3A22%3A29Z&sp=r&sv=2026-02-06&sr=b&scid=ac573a3b-2a08-5e39-9348-db4b2cd3105f&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A41%3A30Z&ske=2026-08-10T02%3A41%3A30Z&sks=b&skv=2026-02-06&sig=NN/1uo0iffiN4dtQFm3pDDxsjzBHKAgJEmdu7oDIhlk%3D' -o assets/summer-2026/hawaii-kona/05.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-4a68-81fd-bb0b-b7e4a948150d/raw?se=2026-08-09T03%3A22%3A34Z&sp=r&sv=2026-02-06&sr=b&scid=6e197d89-422a-532a-92f6-a31743e4ab53&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A14Z&ske=2026-08-10T02%3A43%3A14Z&sks=b&skv=2026-02-06&sig=lEOaFTiJhiXN1UDfVIpTPN%2B0mdmjf/fFckLz3KqE9OU%3D' -o assets/summer-2026/hawaii-kona/06.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-c0f4-81fd-acd1-28317b9ee572/raw?se=2026-08-09T03%3A22%3A40Z&sp=r&sv=2026-02-06&sr=b&scid=1634f02c-4d67-5bf2-b3d0-6cc2e4f17c44&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A44%3A53Z&ske=2026-08-10T02%3A44%3A53Z&sks=b&skv=2026-02-06&sig=7WeIT4utI1WC2bwdUxHW/yNvt/Vij5SqO8Tr4jlW0lo%3D' -o assets/summer-2026/hawaii-kona/07.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-f450-81fd-8a21-f6ac9146b1d8/raw?se=2026-08-09T03%3A22%3A46Z&sp=r&sv=2026-02-06&sr=b&scid=88adbad4-dd8c-515b-8ba6-216ced9fa1d6&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A20Z&ske=2026-08-10T02%3A43%3A20Z&sks=b&skv=2026-02-06&sig=Lfe9AVL3JG1OfoDeeJQDnaghkqj0MFLOKuCatlJQ5Rw%3D' -o assets/summer-2026/hawaii-kona/08.jpg
+      - name: Optimize and commit
+        run: |
+          python -m pip -q install Pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for p in Path('assets/summer-2026/hawaii-kona').glob('*.jpg'):
+              im=Image.open(p).convert('RGB'); im.thumbnail((1800,1800),Image.Resampling.LANCZOS); im.save(p,'JPEG',quality=82,optimize=True,progressive=True)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/hawaii-kona
+          git commit -m 'Add Kona photos' || exit 0
+          git push
