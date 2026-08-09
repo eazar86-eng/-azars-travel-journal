@@ -1,0 +1,36 @@
+name: Distribute Hawaii photos
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/distribute-hawaii-photos.yml']
+permissions:
+  contents: write
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Spread photos through each Hawaii day
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('trips/hawaii-2026/index.html')
+          s=p.read_text()
+          old="""afterHeading('day-0408',makeGallery(['/assets/hawaii/kona-a/01.jpg','/assets/hawaii/kona-a/02.jpg'],'ההגעה לקונה והימים הראשונים בביג איילנד'));afterHeading('day-0508',makeGallery(['/assets/hawaii/kona-a/03.jpg','/assets/hawaii/kona-a/04.jpg','/assets/hawaii/kona-a/05.jpg'],'ים, מלון והקצב של הוואי'));afterHeading('day-0608',makeGallery(['/assets/hawaii/kona-b/01.jpg','/assets/hawaii/kona-b/02.jpg','/assets/hawaii/kona-b/03.jpg','/assets/hawaii/kona-b/04.jpg','/assets/hawaii/kona-b/05.jpg','/assets/hawaii/kona-b/06.jpg','/assets/hawaii/kona-b/07.jpg','/assets/hawaii/kona-b/08.jpg'],'06.08, תצפיות, טבע וחופים בביג איילנד'));afterHeading('day-0708',makeGallery(['/assets/hawaii/volcano/01.jpg','/assets/hawaii/volcano/02.jpg','/assets/hawaii/volcano/03.jpg','/assets/hawaii/volcano/04.jpg','/assets/hawaii/volcano/05.jpg','/assets/hawaii/volcano/06.jpg','/assets/hawaii/volcano/07.jpg','/assets/hawaii/volcano/08.jpg','/assets/hawaii/volcano/09.jpg'],'07.08, Hawaiʻi Volcanoes National Park'));afterHeading('day-0808',makeGallery(['/assets/hawaii/IMG_9821.jpeg','/assets/hawaii/IMG_9823.jpeg','/assets/hawaii/IMG_9825.jpeg','/assets/hawaii/IMG_9831.jpeg','/assets/hawaii/IMG_9833.jpeg','/assets/hawaii/7de0c13e-ce9a-4d00-ba36-17be54857597.jpeg'],'08.08, ערב לואו בהוואי'));"""
+          new="""function spreadDay(id,paths,label){const start=document.getElementById(id);if(!start)return;let nodes=[],n=start.nextElementSibling;while(n&&!n.id?.startsWith('day-')){if(n.tagName==='P'||n.tagName==='H3')nodes.push(n);n=n.nextElementSibling}const slots=nodes.filter(x=>x.tagName==='P'&&x.textContent.length>70);paths.forEach((src,i)=>{if(!slots.length)return;const at=slots[Math.min(slots.length-1,Math.floor((i+1)*slots.length/(paths.length+1)))];at.after(makeGallery([src],label))})}
+          spreadDay('day-0408',['/assets/hawaii/kona-a/01.jpg','/assets/hawaii/kona-a/02.jpg'],'04.08 · מגיעים לביג איילנד');
+          spreadDay('day-0508',['/assets/hawaii/kona-a/03.jpg','/assets/hawaii/kona-a/04.jpg','/assets/hawaii/kona-a/05.jpg'],'05.08 · ים, בריכה והקצב של הוואי');
+          spreadDay('day-0608',['/assets/hawaii/kona-b/01.jpg','/assets/hawaii/kona-b/02.jpg','/assets/hawaii/kona-b/03.jpg','/assets/hawaii/kona-b/04.jpg','/assets/hawaii/kona-b/05.jpg','/assets/hawaii/kona-b/06.jpg','/assets/hawaii/kona-b/07.jpg','/assets/hawaii/kona-b/08.jpg'],'06.08 · Pololū, טבע וחופים');
+          spreadDay('day-0708',['/assets/hawaii/volcano/01.jpg','/assets/hawaii/volcano/02.jpg','/assets/hawaii/volcano/03.jpg','/assets/hawaii/volcano/04.jpg','/assets/hawaii/volcano/05.jpg','/assets/hawaii/volcano/06.jpg','/assets/hawaii/volcano/07.jpg','/assets/hawaii/volcano/08.jpg','/assets/hawaii/volcano/09.jpg'],'07.08 · Hawaiʻi Volcanoes National Park');
+          spreadDay('day-0808',['/assets/hawaii/IMG_9821.jpeg','/assets/hawaii/IMG_9823.jpeg','/assets/hawaii/IMG_9825.jpeg','/assets/hawaii/IMG_9831.jpeg','/assets/hawaii/IMG_9833.jpeg','/assets/hawaii/7de0c13e-ce9a-4d00-ba36-17be54857597.jpeg'],'08.08 · ערב לואו בהוואי');"""
+          if old not in s: raise SystemExit('gallery block not found')
+          s=s.replace(old,new).replace('v=20260809h9','v=20260809mag1')
+          p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add trips/hawaii-2026/index.html
+          git commit -m 'Spread Hawaii photos through narrative' || exit 0
+          git push
