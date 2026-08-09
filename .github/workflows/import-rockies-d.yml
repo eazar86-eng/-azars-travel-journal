@@ -1,0 +1,36 @@
+name: Import Rockies photos D
+on:
+  push:
+    paths:
+      - '.github/workflows/import-rockies-d.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Download
+        run: |
+          mkdir -p assets/summer-2026/rockies
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-9e20-81fd-94f0-4dc2b6288086/raw?se=2026-08-09T03%3A18%3A50Z&sp=r&sv=2026-02-06&sr=b&scid=faaee52b-fb16-59d5-abad-06172c0860aa&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A48%3A33Z&ske=2026-08-10T02%3A48%3A33Z&sks=b&skv=2026-02-06&sig=d49pe8mrzrE8lLIrp08rK5xc1UxIylcLwF40o1vAPuM%3D' -o assets/summer-2026/rockies/12.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-ce58-81fd-82ea-a37498e705eb/raw?se=2026-08-09T03%3A18%3A54Z&sp=r&sv=2026-02-06&sr=b&scid=c6653aa4-9340-5613-aa87-243b9b713335&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A54%3A25Z&ske=2026-08-10T02%3A54%3A25Z&sks=b&skv=2026-02-06&sig=noDfbQ4TRJCGUqpbNMhIIHf0KnmCUpDnaM2p5wb%2BfgQ%3D' -o assets/summer-2026/rockies/13.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-d040-81fd-b451-6ccbff0ec75c/raw?se=2026-08-09T03%3A18%3A57Z&sp=r&sv=2026-02-06&sr=b&scid=d18f36f3-39d5-5e94-bd7e-bb8e4598affe&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A39%3A35Z&ske=2026-08-10T02%3A39%3A35Z&sks=b&skv=2026-02-06&sig=%2B83Va1XtjD15hYc61QSajK6C9K6MR4BzIswJtSw6Fhk%3D' -o assets/summer-2026/rockies/14.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-5458-81fd-857b-eb0ddb2a29e2/raw?se=2026-08-09T03%3A19%3A01Z&sp=r&sv=2026-02-06&sr=b&scid=133d30e1-b34d-502e-9d57-2b0d8a19734e&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A48%3A33Z&ske=2026-08-10T02%3A48%3A33Z&sks=b&skv=2026-02-06&sig=Qjbz4Ihw8nf139RHMqvth65/cnvMbRhIrDPLTSqU/k8%3D' -o assets/summer-2026/rockies/15.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-f51c-81fd-8785-490033800232/raw?se=2026-08-09T03%3A19%3A05Z&sp=r&sv=2026-02-06&sr=b&scid=23559019-0079-5b5a-b585-aa24911d0ea6&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T14%3A36%3A51Z&ske=2026-08-09T14%3A36%3A51Z&sks=b&skv=2026-02-06&sig=b4UEbPSPcdMJBrQJMcup24uhjhWIX2pENNPakOP3seU%3D' -o assets/summer-2026/rockies/16.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-9e34-81fd-a6d2-b12100fc5ccf/raw?se=2026-08-09T03%3A19%3A08Z&sp=r&sv=2026-02-06&sr=b&scid=5a7b2ed1-49f6-5545-93d6-e40443aaaf72&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T13%3A37%3A01Z&ske=2026-08-09T13%3A37%3A01Z&sks=b&skv=2026-02-06&sig=pCcRrz5x8hcyWjtnUt5WtJADuXDX0CxO7ubgVqwT8pQ%3D' -o assets/summer-2026/rockies/17.jpg
+      - name: Optimize and commit
+        run: |
+          python -m pip -q install Pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for p in Path('assets/summer-2026/rockies').glob('*.jpg'):
+              im=Image.open(p).convert('RGB'); im.thumbnail((1800,1800),Image.Resampling.LANCZOS); im.save(p,'JPEG',quality=82,optimize=True,progressive=True)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/rockies
+          git commit -m 'Add Rockies photos part D' || exit 0
+          git push
