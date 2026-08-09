@@ -1,0 +1,36 @@
+name: Import Glacier photos B
+on:
+  push:
+    paths:
+      - '.github/workflows/import-glacier-b.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Download
+        run: |
+          mkdir -p assets/summer-2026/glacier
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-fe28-81fd-bf46-6b39e72ff0ea/raw?se=2026-08-09T03%3A20%3A34Z&sp=r&sv=2026-02-06&sr=b&scid=5ab656a1-7441-5986-ae71-ee0906a8a478&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A18%3A07Z&ske=2026-08-10T02%3A18%3A07Z&sks=b&skv=2026-02-06&sig=wmEqWIhxMBTeRr6yXdBef73sUec2mRImxQPdB0H6Hz0%3D' -o assets/summer-2026/glacier/08.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-5374-81fd-9df7-25633aa7e50d/raw?se=2026-08-09T03%3A20%3A40Z&sp=r&sv=2026-02-06&sr=b&scid=0f218776-df6e-527d-9564-557d6a66ccbd&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A01Z&ske=2026-08-10T02%3A43%3A01Z&sks=b&skv=2026-02-06&sig=OurHwNlus7GkVbrd6FUpgFEexn6eoeEidKgxLuITp5E%3D' -o assets/summer-2026/glacier/09.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-1d94-81fd-a710-05f4888bc70e/raw?se=2026-08-09T03%3A20%3A44Z&sp=r&sv=2026-02-06&sr=b&scid=487672c6-2b5e-5fac-b09c-8d5e18756b05&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A41%3A19Z&ske=2026-08-10T02%3A41%3A19Z&sks=b&skv=2026-02-06&sig=KNRNTJ%2BNzig3prmcQpc%2BmrBFY2Cd2qKiVJZx854jjTk%3D' -o assets/summer-2026/glacier/10.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-6020-81fd-b9aa-d049fc6d61ce/raw?se=2026-08-09T03%3A20%3A47Z&sp=r&sv=2026-02-06&sr=b&scid=85ab21ae-8799-59df-86e0-1cc653536319&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A48%3A50Z&ske=2026-08-10T02%3A48%3A50Z&sks=b&skv=2026-02-06&sig=bJmkIMdWb28b8fJmI1m7vEhR5iowi2nU6jQC5Il5Pe8%3D' -o assets/summer-2026/glacier/11.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-b844-81fd-80c5-9e0dc4b3844f/raw?se=2026-08-09T03%3A20%3A53Z&sp=r&sv=2026-02-06&sr=b&scid=81faa98b-7eac-51de-9212-7ab71da49eed&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A52%3A25Z&ske=2026-08-10T02%3A52%3A25Z&sks=b&skv=2026-02-06&sig=qfGXcrje1DjkovXMx9KD1MgoJXP1kD138N3BsDl0oFk%3D' -o assets/summer-2026/glacier/12.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-60b8-81fd-b5ce-ff9edf454967/raw?se=2026-08-09T03%3A20%3A57Z&sp=r&sv=2026-02-06&sr=b&scid=2a90c9b2-1cf2-5a1b-b475-b82dee6a462e&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A45%3A15Z&ske=2026-08-10T02%3A45%3A15Z&sks=b&skv=2026-02-06&sig=K1DGOarquUtgtPN0UWxyZoa/r66JJdsNjkoHOmdX8mg%3D' -o assets/summer-2026/glacier/13.jpg
+      - name: Optimize and commit
+        run: |
+          python -m pip -q install Pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for p in Path('assets/summer-2026/glacier').glob('*.jpg'):
+              im=Image.open(p).convert('RGB'); im.thumbnail((1800,1800),Image.Resampling.LANCZOS); im.save(p,'JPEG',quality=82,optimize=True,progressive=True)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/glacier
+          git commit -m 'Add Glacier photos part B' || exit 0
+          git push
