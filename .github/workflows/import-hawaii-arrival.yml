@@ -1,0 +1,35 @@
+name: Import Hawaii arrival photos
+on:
+  push:
+    paths:
+      - '.github/workflows/import-hawaii-arrival.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Download
+        run: |
+          mkdir -p assets/summer-2026/hawaii-arrival
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-8604-81fd-926b-6f195c06f7b0/raw?se=2026-08-09T03%3A21%3A24Z&sp=r&sv=2026-02-06&sr=b&scid=7a530fe0-35a0-556c-aa25-23b313f56faf&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A15Z&ske=2026-08-10T02%3A43%3A15Z&sks=b&skv=2026-02-06&sig=FHhFFVRDtu4ynv6uIMPSxvQchAWJ3MKKTkj1XJmXBd8%3D' -o assets/summer-2026/hawaii-arrival/01.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-c3d4-81fd-873b-66fe7a5eb46a/raw?se=2026-08-09T03%3A21%3A29Z&sp=r&sv=2026-02-06&sr=b&scid=e9c29d6e-a9dc-568c-b3e0-4ff234cd2b4d&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A47%3A08Z&ske=2026-08-10T02%3A47%3A08Z&sks=b&skv=2026-02-06&sig=FCyeYpeJ1r9wKi5EANC5/73uJh5EebRbKU7dHVPhLgU%3D' -o assets/summer-2026/hawaii-arrival/02.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-a1a8-81fd-a853-9942c1ae7481/raw?se=2026-08-09T03%3A21%3A32Z&sp=r&sv=2026-02-06&sr=b&scid=c2f38d16-349f-51ca-9eb0-50087545d626&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A52%3A29Z&ske=2026-08-10T02%3A52%3A29Z&sks=b&skv=2026-02-06&sig=KmQE8HZo0WoYPv7ZGk5jsXKOi4Q3wHG8fUDxn0ARgas%3D' -o assets/summer-2026/hawaii-arrival/03.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-4fe8-81fd-be77-1b2018c55cb4/raw?se=2026-08-09T03%3A21%3A37Z&sp=r&sv=2026-02-06&sr=b&scid=251372d2-0995-5617-9f77-888558b1909a&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A01Z&ske=2026-08-10T02%3A43%3A01Z&sks=b&skv=2026-02-06&sig=IDrEy6sGNU6T9dKDibgYd03pv29KT/zvYGntkaMdHyI%3D' -o assets/summer-2026/hawaii-arrival/04.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-f468-81fd-9263-49f3e3fc1fa7/raw?se=2026-08-09T03%3A21%3A41Z&sp=r&sv=2026-02-06&sr=b&scid=9799dd81-bac7-51c9-a9d5-3acff3597c5d&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A52%3A31Z&ske=2026-08-10T02%3A52%3A31Z&sks=b&skv=2026-02-06&sig=rMVdPyJyb1ObJ%2BYEq4tmp/BpcxvGUZSHlQyaw/hj/Us%3D' -o assets/summer-2026/hawaii-arrival/05.jpg
+      - name: Optimize and commit
+        run: |
+          python -m pip -q install Pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for p in Path('assets/summer-2026/hawaii-arrival').glob('*.jpg'):
+              im=Image.open(p).convert('RGB'); im.thumbnail((1800,1800),Image.Resampling.LANCZOS); im.save(p,'JPEG',quality=82,optimize=True,progressive=True)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/hawaii-arrival
+          git commit -m 'Add Hawaii arrival photos' || exit 0
+          git push
