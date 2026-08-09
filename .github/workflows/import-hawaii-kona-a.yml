@@ -1,0 +1,28 @@
+name: Import Kona photos A
+permissions:
+  contents: write
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-hawaii-kona-a.yml'
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download photos
+        run: |
+          mkdir -p assets/hawaii/kona-a
+          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-7948-81fd-a028-d26f1812806a/raw?se=2026-08-09T02%3A58%3A27Z&sp=r&sv=2026-02-06&sr=b&scid=4c3e0f78-4c6d-50b7-bda2-ce5486bb1350&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A48%3A48Z&ske=2026-08-10T02%3A48%3A48Z&sks=b&skv=2026-02-06&sig=T%2BADbhGQF7xujozZ468zg3fCXbLlA3oeZ0pQGxDcQmw%3D' -o assets/hawaii/kona-a/01.jpg
+          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-2114-81fd-9ae8-c4f76009bde3/raw?se=2026-08-09T03%3A00%3A16Z&sp=r&sv=2026-02-06&sr=b&scid=e9536695-afaa-5352-bfcd-a96849225ae8&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A04Z&ske=2026-08-10T02%3A43%3A04Z&sks=b&skv=2026-02-06&sig=nkQn%2BywKon2rA1eOOjWU2sZs0FBbtTI25mAp1YwFaNI%3D' -o assets/hawaii/kona-a/02.jpg
+          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-97f4-81fd-b5be-a8c968e40ce4/raw?se=2026-08-09T03%3A00%3A21Z&sp=r&sv=2026-02-06&sr=b&scid=51964271-f659-539f-9835-9a246cb3d197&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T14%3A36%3A20Z&ske=2026-08-09T14%3A36%3A20Z&sks=b&skv=2026-02-06&sig=FM3XpeBh56DvlEC/sEUdf69ZbmG6pNgctlKvWkkb9hY%3D' -o assets/hawaii/kona-a/03.jpg
+          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-01d4-81fd-ae79-4e614a35e428/raw?se=2026-08-09T03%3A00%3A25Z&sp=r&sv=2026-02-06&sr=b&scid=02d7c7d2-fb8e-5d40-9a7e-52a304d98347&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A54%3A25Z&ske=2026-08-10T02%3A54%3A25Z&sks=b&skv=2026-02-06&sig=81xOqvPhqYHsysHAc3MCS7cNkyjoQFeFq0JgDkz5KUo%3D' -o assets/hawaii/kona-a/04.jpg
+          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-35fc-81fd-8f6f-9e8cd106a7f9/raw?se=2026-08-09T03%3A00%3A29Z&sp=r&sv=2026-02-06&sr=b&scid=6a8ec055-c75f-58aa-8492-0f7d88757899&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A01Z&ske=2026-08-10T02%3A43%3A01Z&sks=b&skv=2026-02-06&sig=s6vD0QjFQl0MPO1sn1m3dyIcTZPyTL5WuhAwME2FTIA%3D' -o assets/hawaii/kona-a/05.jpg
+      - name: Commit photos
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/hawaii/kona-a
+          git commit -m 'Add Kona photo set A'
+          git push
