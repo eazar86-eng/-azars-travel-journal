@@ -1,0 +1,24 @@
+name: Import home hero
+permissions:
+  contents: write
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-home-hero.yml'
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download requested image
+        run: |
+          mkdir -p assets/home
+          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-10bc-81fd-811b-63a9e31c2090/raw?se=2026-08-09T02%3A55%3A04Z&sp=r&sv=2026-02-06&sr=b&scid=b12b6674-319b-5463-ae4a-016c91922dd6&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T11%3A36%3A48Z&ske=2026-08-09T11%3A36%3A48Z&sks=b&skv=2026-02-06&sig=rsbotSWQwdBOxetB7K59NlUDU3oQRff0K%2B9DBxfwbw0%3D' -o assets/home/green-wall.jpg
+      - name: Commit image
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/home/green-wall.jpg
+          git commit -m 'Add requested home background image'
+          git push
