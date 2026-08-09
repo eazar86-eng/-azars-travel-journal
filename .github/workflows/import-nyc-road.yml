@@ -1,0 +1,40 @@
+name: Import New York and road photos
+on:
+  push:
+    paths:
+      - '.github/workflows/import-nyc-road.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download photos
+        run: |
+          mkdir -p assets/summer-2026/nyc-road
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-ba2c-81fd-b743-036ac3b42204/raw?se=2026-08-09T03%3A16%3A38Z&sp=r&sv=2026-02-06&sr=b&scid=e327cfea-a4c8-505a-97f6-81edfb356c5c&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A52%3A25Z&ske=2026-08-10T02%3A52%3A25Z&sks=b&skv=2026-02-06&sig=du7R24ewTUW%2BY5WYbkz3vUlQpJFUI0nqee4uv4Tnpe8%3D' -o assets/summer-2026/nyc-road/01.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-d218-81fd-ba69-d0154047e3a5/raw?se=2026-08-09T03%3A16%3A43Z&sp=r&sv=2026-02-06&sr=b&scid=0c153d33-f6d6-5c3b-ba2c-e0316fec5690&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A43%3A03Z&ske=2026-08-10T02%3A43%3A03Z&sks=b&skv=2026-02-06&sig=R8DKkoR%2BwGyRd%2BlBkO3NRyvoDwiGFqeK8ak6j6gFj2c%3D' -o assets/summer-2026/nyc-road/02.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-d394-81fd-9dc6-b76e0ed538bb/raw?se=2026-08-09T03%3A16%3A48Z&sp=r&sv=2026-02-06&sr=b&scid=b3be1faa-bb6e-57b1-8220-0175f30472e3&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A41%3A15Z&ske=2026-08-10T02%3A41%3A15Z&sks=b&skv=2026-02-06&sig=ff3ilhRV0mnidOYWcTLoJ4YmSChXS7PbBIdy8kgJTvM%3D' -o assets/summer-2026/nyc-road/03.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-1eb0-81fd-8f94-984e276d495d/raw?se=2026-08-09T03%3A16%3A53Z&sp=r&sv=2026-02-06&sr=b&scid=2045cedd-c5c6-5627-95eb-87bea1519151&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A45%3A17Z&ske=2026-08-10T02%3A45%3A17Z&sks=b&skv=2026-02-06&sig=1Gvda3ak4yG9KCmjEwbRinacc9r4ME/07V3YX4TMdDM%3D' -o assets/summer-2026/nyc-road/04.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-7440-81fd-95ca-85d622afc1a2/raw?se=2026-08-09T03%3A16%3A56Z&sp=r&sv=2026-02-06&sr=b&scid=71b5ae2b-52a5-583d-a99c-b83cdd707968&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T13%3A37%3A00Z&ske=2026-08-09T13%3A37%3A00Z&sks=b&skv=2026-02-06&sig=1ByAULGGxeliZe6RmYpeJHQqlMEL/YfW1ZflrSNuk1o%3D' -o assets/summer-2026/nyc-road/05.jpg
+      - name: Optimize
+        run: |
+          python -m pip -q install Pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for p in Path('assets/summer-2026/nyc-road').glob('*.jpg'):
+              im=Image.open(p).convert('RGB')
+              im.thumbnail((1800,1800), Image.Resampling.LANCZOS)
+              im.save(p,'JPEG',quality=82,optimize=True,progressive=True)
+          PY
+      - name: Commit photos
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/nyc-road
+          git commit -m 'Add New York and road photos' || exit 0
+          git push
