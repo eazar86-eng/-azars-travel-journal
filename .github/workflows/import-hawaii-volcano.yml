@@ -1,32 +1,39 @@
-name: Import volcano photos
-permissions:
-  contents: write
+name: Import Hawaii volcano photos
 on:
   push:
-    branches: [main]
     paths:
       - '.github/workflows/import-hawaii-volcano.yml'
+permissions:
+  contents: write
 jobs:
   import:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download photos
+        with: {fetch-depth: 0}
+      - name: Download
         run: |
-          mkdir -p assets/hawaii/volcano
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-9cd8-81fd-bf81-d15833c22651/raw?se=2026-08-09T03%3A01%3A49Z&sp=r&sv=2026-02-06&sr=b&scid=d82a501e-3d5b-596b-a5aa-74fbe421824c&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A53%3A57Z&ske=2026-08-10T02%3A53%3A57Z&sks=b&skv=2026-02-06&sig=d2O/4KkkSY1JbyTfGVXpIvvv%2BljbaEFvlu8mKo1pvUs%3D' -o assets/hawaii/volcano/01.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-c094-81fd-8a64-f95317e441c7/raw?se=2026-08-09T03%3A01%3A53Z&sp=r&sv=2026-02-06&sr=b&scid=9a0b1f78-a628-55c2-b86b-055c37a0130a&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A46%3A58Z&ske=2026-08-10T02%3A46%3A58Z&sks=b&skv=2026-02-06&sig=D6PZLBTEP7UQGEzfrhAmpXXSr3EcAbn0JPbGxpeLSvQ%3D' -o assets/hawaii/volcano/02.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-54ac-81fd-8477-f7741b987518/raw?se=2026-08-09T03%3A01%3A57Z&sp=r&sv=2026-02-06&sr=b&scid=7ca2703a-c08c-5af5-8c96-5f64ff94947d&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T14%3A36%3A20Z&ske=2026-08-09T14%3A36%3A20Z&sks=b&skv=2026-02-06&sig=sn4FD48CyDpEcY6UBttCeUbda3MfZYMXY47DbY4UPLk%3D' -o assets/hawaii/volcano/03.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-5728-81fd-9d89-5ac31089ddb2/raw?se=2026-08-09T03%3A02%3A03Z&sp=r&sv=2026-02-06&sr=b&scid=d4d0b8de-b5a7-5445-91ee-11592f7ac575&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A18%3A07Z&ske=2026-08-10T02%3A18%3A07Z&sks=b&skv=2026-02-06&sig=Bu6HP2KA%2BB3kpUwdk8M%2BmLwV%2BQ3041QZEyHql50V1RA%3D' -o assets/hawaii/volcano/04.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-6160-81fd-9788-d4761539a3b6/raw?se=2026-08-09T03%3A02%3A07Z&sp=r&sv=2026-02-06&sr=b&scid=37a9f6c4-68bc-5e5c-8ac8-a7c9711da3f4&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T14%3A36%3A48Z&ske=2026-08-09T14%3A36%3A48Z&sks=b&skv=2026-02-06&sig=nOkVNmsvba2cFRPers2n9kS7h5sb1nTUvPVff5BgFRo%3D' -o assets/hawaii/volcano/05.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-f538-81fd-b04d-f6a541ef57c4/raw?se=2026-08-09T03%3A02%3A11Z&sp=r&sv=2026-02-06&sr=b&scid=2bea767b-3bd0-5034-984b-0133bcf69561&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T10%3A24%3A57Z&ske=2026-08-09T10%3A24%3A57Z&sks=b&skv=2026-02-06&sig=o9bZ7j20yHLdSKDknjvcAgdKT4pEFn7NmlseCXHoJDw%3D' -o assets/hawaii/volcano/06.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-45b4-81fd-8584-a1f73ff87ebe/raw?se=2026-08-09T03%3A02%3A15Z&sp=r&sv=2026-02-06&sr=b&scid=76a72749-83fc-5c83-aa02-639f6b39876d&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A44%3A53Z&ske=2026-08-10T02%3A44%3A53Z&sks=b&skv=2026-02-06&sig=WbLV65QgjP5orXJMnR9Mg9yDNV3dZPJ1/LNFTI7L5Y4%3D' -o assets/hawaii/volcano/07.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-08a0-81fd-9061-33781ac348c3/raw?se=2026-08-09T03%3A02%3A19Z&sp=r&sv=2026-02-06&sr=b&scid=939af25f-f1e5-5592-bc3d-4d440f9db218&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T13%3A36%3A31Z&ske=2026-08-09T13%3A36%3A31Z&sks=b&skv=2026-02-06&sig=7/oBEqKFRI0YkI0tvRMPCpZYWs44ElepmaMAnpebUkA%3D' -o assets/hawaii/volcano/08.jpg
-          curl -L --fail 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-a000-81fd-9381-029f327751d9/raw?se=2026-08-09T03%3A02%3A22Z&sp=r&sv=2026-02-06&sr=b&scid=93667425-aa94-59e4-8925-a8d1feeea4a9&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A53%3A57Z&ske=2026-08-10T02%3A53%3A57Z&sks=b&skv=2026-02-06&sig=DqcjyIAsbeByQsvqgmkVW1BNKPHebQi7cX4nLtrgaOc%3D' -o assets/hawaii/volcano/09.jpg
-      - name: Commit photos
+          mkdir -p assets/summer-2026/hawaii-volcano
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-cc54-81fd-a21a-44d1f928aafe/raw?se=2026-08-09T03%3A23%3A15Z&sp=r&sv=2026-02-06&sr=b&scid=d60b6c54-9077-518b-b5e5-add6440e7615&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T13%3A37%3A00Z&ske=2026-08-09T13%3A37%3A00Z&sks=b&skv=2026-02-06&sig=BVW94PWx4okBkw7YVLtdH4z9RtzjyTa4oqCZbRcGS%2B4%3D' -o assets/summer-2026/hawaii-volcano/01.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-9654-81fd-adca-62d4f0a16af6/raw?se=2026-08-09T03%3A23%3A24Z&sp=r&sv=2026-02-06&sr=b&scid=a305db1d-966a-5dfe-be87-07f1a48c543a&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T13%3A37%3A00Z&ske=2026-08-09T13%3A37%3A00Z&sks=b&skv=2026-02-06&sig=gPaQxXKYHGQyZFaeChFImWqjPcmdqMtjvFy200/Po3I%3D' -o assets/summer-2026/hawaii-volcano/02.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-9250-81fd-956b-fddf6a518259/raw?se=2026-08-09T03%3A23%3A30Z&sp=r&sv=2026-02-06&sr=b&scid=cff9a03b-1e13-5889-8e91-5043afb8a414&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T14%3A36%3A20Z&ske=2026-08-09T14%3A36%3A20Z&sks=b&skv=2026-02-06&sig=nPWLSRWmfvSvFv5me9VHfFjXM0muPC%2BdN7QWOrCNxok%3D' -o assets/summer-2026/hawaii-volcano/03.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-79c8-81fd-9917-8dabdc019db0/raw?se=2026-08-09T03%3A23%3A35Z&sp=r&sv=2026-02-06&sr=b&scid=d328e8d3-5eae-5ea0-be7f-bf85adb0da72&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T12%3A03%3A16Z&ske=2026-08-09T12%3A03%3A16Z&sks=b&skv=2026-02-06&sig=1yMpXBO%2BgzYxYquNlHBgBNmOwqwmSbuN9E6ZrRYy04Q%3D' -o assets/summer-2026/hawaii-volcano/04.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-0590-81fd-83b1-e217a2bb4e88/raw?se=2026-08-09T03%3A23%3A41Z&sp=r&sv=2026-02-06&sr=b&scid=7fbe5989-2ee3-5caa-9c60-294ffc75a44d&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T11%3A36%3A41Z&ske=2026-08-09T11%3A36%3A41Z&sks=b&skv=2026-02-06&sig=zFmD49edSis/kAlxCgmGFu7MMKxk1J1H2oKmI6XtrYw%3D' -o assets/summer-2026/hawaii-volcano/05.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-50b4-81fd-8400-6d93e5f15eb9/raw?se=2026-08-09T03%3A23%3A47Z&sp=r&sv=2026-02-06&sr=b&scid=e43ce65c-dd82-598c-ad19-368fb26acf2b&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A47%3A07Z&ske=2026-08-10T02%3A47%3A07Z&sks=b&skv=2026-02-06&sig=y6gCSvmz24O63hl2OiXOfEgsb9ZCK82IaM6LxHjIse0%3D' -o assets/summer-2026/hawaii-volcano/06.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-3970-81fd-b3a9-1bc11e23b156/raw?se=2026-08-09T03%3A23%3A52Z&sp=r&sv=2026-02-06&sr=b&scid=e90e0e94-acae-59e5-8c17-4faa67273e63&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A48%3A53Z&ske=2026-08-10T02%3A48%3A53Z&sks=b&skv=2026-02-06&sig=tPhoyL0UNUnPwwqT3NfbYdWxEfzQw%2BlTKSHLhiR0j2g%3D' -o assets/summer-2026/hawaii-volcano/07.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-48a4-81fd-87cc-69744bed1327/raw?se=2026-08-09T03%3A23%3A57Z&sp=r&sv=2026-02-06&sr=b&scid=14b4f583-fe56-5b98-8e22-25c403a886d1&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A47%3A00Z&ske=2026-08-10T02%3A47%3A00Z&sks=b&skv=2026-02-06&sig=q9IdcoFpxDXpJVlJQtgcb1rRab64uagbQETUyzrWYoY%3D' -o assets/summer-2026/hawaii-volcano/08.jpg
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-89b4-81fd-abbd-62857295e3b9/raw?se=2026-08-09T03%3A24%3A03Z&sp=r&sv=2026-02-06&sr=b&scid=9d0bd5b1-9982-5f26-82b1-230115197f76&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T13%3A36%3A30Z&ske=2026-08-09T13%3A36%3A30Z&sks=b&skv=2026-02-06&sig=sbKh8KoRhaTKrRduSFFaoykIXaxNa3JIDRHWcwVXJ5E%3D' -o assets/summer-2026/hawaii-volcano/09.jpg
+      - name: Optimize and commit
         run: |
+          python -m pip -q install Pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for p in Path('assets/summer-2026/hawaii-volcano').glob('*.jpg'):
+              im=Image.open(p).convert('RGB'); im.thumbnail((1800,1800),Image.Resampling.LANCZOS); im.save(p,'JPEG',quality=82,optimize=True,progressive=True)
+          PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/hawaii/volcano
-          git commit -m 'Add volcano photo set'
+          git add assets/summer-2026/hawaii-volcano
+          git commit -m 'Add Hawaii volcano photos' || exit 0
           git push
