@@ -34,12 +34,17 @@
   .trip-pin.current{background:var(--accent)}
   .trip-pin i{font-style:normal;transform:rotate(45deg);font-size:11px;font-weight:900}
   .transportIcon{font-size:26px;filter:drop-shadow(0 2px 3px rgba(255,255,255,.95)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
-  .day0908Photos{margin:32px -150px 46px;background:var(--paper);border:1px solid var(--line);border-radius:22px;overflow:hidden}
-  .day0908Photos img{display:block;width:100%;height:auto}
-  .day0908Photos figcaption{padding:12px 14px;color:var(--muted);font-size:12px;line-height:1.6}
-  @media(max-width:1000px){.day0908Photos{margin:30px -40px 42px}}
+  .dayMedia{margin:28px -120px 42px;display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dayMedia.single{grid-template-columns:1fr}
+  .dayMedia.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dayMedia figure{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .dayMedia .spritePhoto{width:100%;aspect-ratio:1/1;background-image:url('/assets/summer-2026/day-0908/all-photos.jpg?v=20260810waipio2');background-repeat:no-repeat;background-size:300% 300%;background-color:#ddd}
+  .dayMedia figure.heroFrame .spritePhoto{aspect-ratio:16/9}
+  .dayMedia figcaption{padding:10px 12px;color:var(--muted);font-size:12px;line-height:1.55}
+  @media(max-width:1000px){.dayMedia{margin:26px -35px 38px}}
   @media(max-width:900px){.tripGrid{grid-template-columns:1fr}.visitedGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.visitedCard{min-height:160px}#summerTripMap{height:390px}}
-  @media(max-width:560px){.tripOverviewHead{display:block}.tripOverviewHead p{margin-top:6px}.visitedGrid{grid-template-columns:1fr}.visitedCard{min-height:190px}#summerTripMap{height:350px}.day0908Photos{margin:26px 0 36px}}
+  @media(max-width:700px){.dayMedia,.dayMedia.three{grid-template-columns:1fr;margin:24px 0 34px}.dayMedia figure.heroFrame .spritePhoto{aspect-ratio:4/3}}
+  @media(max-width:560px){.tripOverviewHead{display:block}.tripOverviewHead p{margin-top:6px}.visitedGrid{grid-template-columns:1fr}.visitedCard{min-height:190px}#summerTripMap{height:350px}}
   `;
   document.head.appendChild(style);
 
@@ -98,11 +103,42 @@
     map.fitBounds(L.latLngBounds([pts.big,pts.ny,pts.rockies,pts.la]),{padding:[28,28]});
   }
 
+  const spritePos=[
+    ['0%','0%'],['50%','0%'],['100%','0%'],
+    ['0%','50%'],['50%','50%'],['100%','50%'],
+    ['0%','100%'],['50%','100%'],['100%','100%']
+  ];
+  function spriteFigure(index,caption,heroFrame){
+    const f=document.createElement('figure');
+    if(heroFrame)f.className='heroFrame';
+    const ph=document.createElement('div');
+    ph.className='spritePhoto';
+    ph.style.backgroundPosition=spritePos[index][0]+' '+spritePos[index][1];
+    ph.setAttribute('role','img');
+    ph.setAttribute('aria-label',caption);
+    const cap=document.createElement('figcaption');cap.textContent=caption;
+    f.append(ph,cap);return f;
+  }
+  function mediaBlock(items,klass){
+    const wrap=document.createElement('div');wrap.className='dayMedia '+(klass||'');
+    items.forEach(x=>wrap.appendChild(spriteFigure(x[0],x[1],x[2])));
+    return wrap;
+  }
+  function findHeading(root,text){return Array.from(root.querySelectorAll('h3')).find(h=>h.textContent.trim()===text)}
+  function insertAfterParagraphs(heading,node,count){
+    if(!heading)return;let cur=heading,c=0;
+    while(cur.nextSibling&&c<count){cur=cur.nextSibling;if(cur.nodeType===1&&cur.tagName==='P')c++}
+    cur.after(node);
+  }
+  function ensureDayTab(){
+    const days=document.querySelector('.hawaiiDays');
+    if(days&&!days.querySelector('a[href="#day-0908"]'))days.insertAdjacentHTML('beforeend','<a href="#day-0908">09.08 · Waipiʻo</a>');
+  }
   function addDay0908(){
+    ensureDayTab();
     if(document.getElementById('day-0908'))return;
-    const d8=document.getElementById('day-0808');
-    if(typeof window.render!=='function'||!d8||d8.hasAttribute('data-initial-anchor')){setTimeout(addDay0908,250);return}
-    fetch('/content/day-0908.md?v=20260810waipio').then(r=>r.text()).then(md=>{
+    if(typeof window.render!=='function'||!document.getElementById('day-0808')){setTimeout(addDay0908,250);return}
+    fetch('/content/day-0908.md?v=20260810waipio3').then(r=>r.text()).then(md=>{
       if(document.getElementById('day-0908'))return;
       const root=document.getElementById('story');
       const tmp=document.createElement('div');
@@ -110,15 +146,31 @@
       const date=tmp.querySelector('.dateHead');
       if(date){date.id='day-0908';date.textContent='יום ראשון, 9 באוגוסט'}
       while(tmp.firstChild)root.appendChild(tmp.firstChild);
-      const photo=document.createElement('figure');
-      photo.className='day0908Photos';
-      photo.innerHTML='<img src="/assets/summer-2026/day-0908/all-photos.jpg?v=20260810waipio" alt="Waipiʻo Valley, Waipiʻo Fruit Shack והערב מול הים"><figcaption>רגעים מ־09/08: Waipiʻo Valley, הפירות מהחווה והערב מול הים.</figcaption>';
-      const h=document.getElementById('day-0908');
-      let pos=h,paragraphs=0;
-      while(pos.nextSibling&&paragraphs<4){pos=pos.nextSibling;if(pos.nodeType===1&&pos.tagName==='P')paragraphs++}
-      pos.after(photo);
-      const days=document.querySelector('.hawaiiDays');
-      if(days&&!days.querySelector('a[href="#day-0908"]'))days.insertAdjacentHTML('beforeend','<a href="#day-0908">09.08 · Waipiʻo</a>');
+
+      const dateHead=document.getElementById('day-0908');
+      const title=dateHead&&dateHead.nextElementSibling;
+      if(title){
+        let p=title.nextElementSibling;
+        while(p&&p.tagName!=='P')p=p.nextElementSibling;
+        if(p)insertAfterParagraphs(p,mediaBlock([[3,'התמונה המשפחתית בתצפית Waipiʻo Valley',true]],'single'),1);
+      }
+      const waipio=findHeading(root,'Waipiʻo Valley Lookout');
+      insertAfterParagraphs(waipio,mediaBlock([
+        [2,'העמק הירוק עטוף בעננים ובערפל טרופי'],
+        [0,'המצוקים של Waipiʻo פוגשים את האוקיינוס'],
+        [5,'מבט נוסף מהתצפית לכיוון האוקיינוס']
+      ],'three'),3);
+      const fruit=findHeading(root,'Waipiʻo Fruit Shack');
+      insertAfterParagraphs(fruit,mediaBlock([
+        [7,'הכניסה הצבעונית ל Waipiʻo Fruit Shack'],
+        [8,'Waipiʻo Fruit Shack בתוך הצמחייה הטרופית'],
+        [4,'קוקוס טרי שנפתח במקום']
+      ],'three'),2);
+      const hotel=findHeading(root,'אחר הצהריים במלון');
+      insertAfterParagraphs(hotel,mediaBlock([[6,'עוד מבט אחרון על Waipiʻo לפני החזרה למלון']], 'single'),2);
+      const meridia=findHeading(root,'ערב ב Meridia');
+      insertAfterParagraphs(meridia,mediaBlock([[1,'ערב מול הים באווירה רגועה ונעימה',true]],'single'),4);
+      ensureDayTab();
     }).catch(()=>{});
   }
 
