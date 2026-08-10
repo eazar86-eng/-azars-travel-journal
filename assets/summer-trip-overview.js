@@ -100,7 +100,8 @@
 
   function addDay0908(){
     if(document.getElementById('day-0908'))return;
-    if(typeof window.render!=='function'||!document.getElementById('day-0808')){setTimeout(addDay0908,250);return}
+    const d8=document.getElementById('day-0808');
+    if(typeof window.render!=='function'||!d8||d8.hasAttribute('data-initial-anchor')){setTimeout(addDay0908,250);return}
     fetch('/content/day-0908.md?v=20260810waipio').then(r=>r.text()).then(md=>{
       if(document.getElementById('day-0908'))return;
       const root=document.getElementById('story');
