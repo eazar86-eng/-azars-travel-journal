@@ -34,17 +34,19 @@
   .trip-pin.current{background:var(--accent)}
   .trip-pin i{font-style:normal;transform:rotate(45deg);font-size:11px;font-weight:900}
   .transportIcon{font-size:26px;filter:drop-shadow(0 2px 3px rgba(255,255,255,.95)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+  .day0908Photos{margin:32px -150px 46px;background:var(--paper);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+  .day0908Photos img{display:block;width:100%;height:auto}
+  .day0908Photos figcaption{padding:12px 14px;color:var(--muted);font-size:12px;line-height:1.6}
+  @media(max-width:1000px){.day0908Photos{margin:30px -40px 42px}}
   @media(max-width:900px){.tripGrid{grid-template-columns:1fr}.visitedGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.visitedCard{min-height:160px}#summerTripMap{height:390px}}
-  @media(max-width:560px){.tripOverviewHead{display:block}.tripOverviewHead p{margin-top:6px}.visitedGrid{grid-template-columns:1fr}.visitedCard{min-height:190px}#summerTripMap{height:350px}}
+  @media(max-width:560px){.tripOverviewHead{display:block}.tripOverviewHead p{margin-top:6px}.visitedGrid{grid-template-columns:1fr}.visitedCard{min-height:190px}#summerTripMap{height:350px}.day0908Photos{margin:26px 0 36px}}
   `;
   document.head.appendChild(style);
 
   const section=document.createElement('section');
   section.className='tripOverview';
   section.innerHTML=`
-    <div class="tripOverviewHead">
-      <div><h2>מפת המסע המלאה</h2><p>כל מסע קיץ 2026 במבט אחד. טיסה מסומנת במטוס אחד, נסיעה יבשתית ברכב אחד.</p></div>
-    </div>
+    <div class="tripOverviewHead"><div><h2>מפת המסע המלאה</h2><p>כל מסע קיץ 2026 במבט אחד. טיסה מסומנת במטוס אחד, נסיעה יבשתית ברכב אחד.</p></div></div>
     <div class="tripGrid">
       <div class="tripMapCard">
         <div class="tripMapTop"><strong>ניו יורק עד לוס אנג׳לס</strong><span>התחנה הנוכחית: Big Island</span></div>
@@ -70,7 +72,6 @@
       <div class="visitedCard"><img src="/assets/summer-2026/glacier/03.jpg" alt="גליישר"><div class="visitedCopy"><b>Glacier</b><span>גליישר</span></div></div>
       <div class="visitedCard"><img src="/assets/summer-2026/hawaii-kona/02.jpg" alt="ביג איילנד"><div class="visitedCopy"><b>Big Island</b><span>האי הגדול</span></div></div>
     </div>`;
-
   const hero=document.querySelector('.hero');
   if(hero)hero.insertAdjacentElement('afterend',section);
 
@@ -82,15 +83,7 @@
     if(!window.L||!document.getElementById('summerTripMap'))return;
     const map=L.map('summerTripMap',{scrollWheelZoom:false,zoomControl:true,attributionControl:true});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);
-    const pts={
-      ny:[40.7128,-74.0060],
-      sea:[47.6062,-122.3321],
-      rockies:[51.4254,-116.1773],
-      glacier:[48.7596,-113.7870],
-      big:[19.944,-155.879],
-      maui:[20.690,-156.442],
-      la:[34.0522,-118.2437]
-    };
+    const pts={ny:[40.7128,-74.0060],sea:[47.6062,-122.3321],rockies:[51.4254,-116.1773],glacier:[48.7596,-113.7870],big:[19.944,-155.879],maui:[20.690,-156.442],la:[34.0522,-118.2437]};
     const stops=[['New York',pts.ny,1],['Seattle',pts.sea,2],['Canadian Rockies',pts.rockies,3],['Glacier',pts.glacier,4],['Big Island',pts.big,5],['Maui',pts.maui,6],['Los Angeles',pts.la,7]];
     stops.forEach(([name,p,n])=>L.marker(p,{icon:L.divIcon({className:'leaflet-div-icon',html:`<div class="trip-pin ${name==='Big Island'?'current':''}"><i>${n}</i></div>`,iconSize:[30,30],iconAnchor:[15,28]})}).addTo(map).bindTooltip(name,{permanent:false,direction:'top'}));
     const flightStyle={color:'#274c77',weight:3,dashArray:'8 8',opacity:.92};
@@ -101,12 +94,32 @@
     L.polyline([pts.big,pts.maui],flightStyle).addTo(map);
     L.polyline([pts.maui,pts.la],flightStyle).addTo(map);
     function iconAt(p,emoji){L.marker(p,{interactive:false,icon:L.divIcon({className:'leaflet-div-icon',html:`<div class="transportIcon">${emoji}</div>`,iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map)}
-    iconAt([44.2,-97.4],'✈️');
-    iconAt([50.1,-119.2],'🚗');
-    iconAt([33.6,-139.4],'✈️');
-    iconAt([20.3,-156.15],'✈️');
-    iconAt([27.1,-137.0],'✈️');
+    iconAt([44.2,-97.4],'✈️');iconAt([50.1,-119.2],'🚗');iconAt([33.6,-139.4],'✈️');iconAt([20.3,-156.15],'✈️');iconAt([27.1,-137.0],'✈️');
     map.fitBounds(L.latLngBounds([pts.big,pts.ny,pts.rockies,pts.la]),{padding:[28,28]});
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addLeaflet,{once:true}); else addLeaflet();
+
+  function addDay0908(){
+    if(document.getElementById('day-0908'))return;
+    if(typeof window.render!=='function'||!document.getElementById('day-0808')){setTimeout(addDay0908,250);return}
+    fetch('/content/day-0908.md?v=20260810waipio').then(r=>r.text()).then(md=>{
+      if(document.getElementById('day-0908'))return;
+      const root=document.getElementById('story');
+      const tmp=document.createElement('div');
+      window.render(md,tmp);
+      const date=tmp.querySelector('.dateHead');
+      if(date){date.id='day-0908';date.textContent='יום ראשון, 9 באוגוסט'}
+      while(tmp.firstChild)root.appendChild(tmp.firstChild);
+      const photo=document.createElement('figure');
+      photo.className='day0908Photos';
+      photo.innerHTML='<img src="/assets/summer-2026/day-0908/all-photos.jpg?v=20260810waipio" alt="Waipiʻo Valley, Waipiʻo Fruit Shack והערב מול הים"><figcaption>רגעים מ־09/08: Waipiʻo Valley, הפירות מהחווה והערב מול הים.</figcaption>';
+      const h=document.getElementById('day-0908');
+      let pos=h,paragraphs=0;
+      while(pos.nextSibling&&paragraphs<4){pos=pos.nextSibling;if(pos.nodeType===1&&pos.tagName==='P')paragraphs++}
+      pos.after(photo);
+      const days=document.querySelector('.hawaiiDays');
+      if(days&&!days.querySelector('a[href="#day-0908"]'))days.insertAdjacentHTML('beforeend','<a href="#day-0908">09.08 · Waipiʻo</a>');
+    }).catch(()=>{});
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{addLeaflet();addDay0908()},{once:true});else{addLeaflet();addDay0908()}
 })();
