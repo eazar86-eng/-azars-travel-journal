@@ -1,4 +1,7 @@
 (function(){
+  const top0908=document.querySelector('.tools a[href="#day-0908"]');
+  if(top0908)top0908.remove();
+
   const style=document.createElement('style');
   style.textContent=`
   .tripOverview{width:min(1180px,calc(100% - 30px));margin:0 auto 30px}
@@ -38,7 +41,7 @@
   .dayMedia.single{grid-template-columns:1fr}
   .dayMedia.three{grid-template-columns:repeat(3,minmax(0,1fr))}
   .dayMedia figure{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-  .dayMedia .spritePhoto{width:100%;aspect-ratio:1/1;background-image:url('/assets/summer-2026/day-0908/all-photos.jpg?v=20260810waipio2');background-repeat:no-repeat;background-size:300% 300%;background-color:#ddd}
+  .dayMedia .spritePhoto{width:100%;aspect-ratio:1/1;background-image:url('/assets/summer-2026/day-0908/all-photos.jpg?v=20260809fix1');background-repeat:no-repeat;background-size:300% 300%;background-color:#ddd}
   .dayMedia figure.heroFrame .spritePhoto{aspect-ratio:16/9}
   .dayMedia figcaption{padding:10px 12px;color:var(--muted);font-size:12px;line-height:1.55}
   @media(max-width:1000px){.dayMedia{margin:26px -35px 38px}}
@@ -138,7 +141,7 @@
     ensureDayTab();
     if(document.getElementById('day-0908'))return;
     if(typeof window.render!=='function'||!document.getElementById('day-0808')){setTimeout(addDay0908,250);return}
-    fetch('/content/day-0908.md?v=20260810waipio3').then(r=>r.text()).then(md=>{
+    fetch('/content/day-0908.md?v=20260809fix1').then(r=>r.text()).then(md=>{
       if(document.getElementById('day-0908'))return;
       const root=document.getElementById('story');
       const tmp=document.createElement('div');
