@@ -1,0 +1,34 @@
+name: Sync current trip
+
+on:
+  push:
+    paths:
+      - '_data/current_trip.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synchronize current trip across pages
+        run: python scripts/sync_current_trip.py
+      - name: Commit synchronized pages
+        run: |
+          if git diff --quiet; then
+            echo "No synchronization changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html trips/hawaii-2026/index.html trips/summer-2026/index.html
+          git commit -m "Sync current trip across site"
+          git push
