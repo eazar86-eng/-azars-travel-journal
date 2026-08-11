@@ -11,8 +11,7 @@ def parse_simple_yaml(text):
         if not line or line.startswith(' ') or line.lstrip().startswith('-') or ':' not in line:
             continue
         k, v = line.split(':', 1)
-        v = v.strip().strip('"')
-        out[k.strip()] = v
+        out[k.strip()] = v.strip().strip('"')
     return out
 
 
@@ -30,9 +29,8 @@ current_anchor = data['current_day_anchor']
 current_title = data['current_day_title']
 current_summary = data['current_summary']
 current_page = data['current_page']
-version = data['version']
 
-# Home page current trip block
+# Home page: one source of truth for current stop and current day.
 p = ROOT / 'index.html'
 s = p.read_text(encoding='utf-8')
 s = replace_once(
@@ -41,22 +39,22 @@ s = replace_once(
     f'<div class="head"><h2>עכשיו בדרך</h2><p>{current_summary} התחנה הנוכחית שלנו היא <strong>{current_island}</strong>.</p></div>',
     'home current summary'
 )
-s = replace_once(s, r'<div class="tag">MAUI · HAWAIʻI · CURRENT STOP</div>', f'<div class="tag">{current_island.upper()} · HAWAIʻI · CURRENT STOP</div>', 'home current tag')
+s = replace_once(s, r'<div class="tag">[^<]*CURRENT STOP</div>', f'<div class="tag">{current_island.upper()} · HAWAIʻI · CURRENT STOP</div>', 'home current tag')
 s = replace_once(s, r'<h3>פרק חדש: .*?</h3>', f'<h3>פרק חדש: {current_island}</h3>', 'home current title')
 s = replace_once(s, r'<a class="btn" href="[^"]+">[^<]+</a>', f'<a class="btn" href="{current_page}">ליום {current_day} ביומן</a>', 'home current link')
 p.write_text(s, encoding='utf-8')
 
-# Hawaii page hero/current day navigation. Days themselves remain server rendered.
+# Hawaii page: mark exactly one day as current and keep destination wording synchronized.
 p = ROOT / 'trips' / 'hawaii-2026' / 'index.html'
 s = p.read_text(encoding='utf-8')
 s = replace_once(s, r'<span class="currentBadge">.*?</span>', f'<span class="currentBadge">עכשיו במסע: {current_island}</span>', 'hawaii current badge')
-s = re.sub(r'<a class="current" href="#day-\d+">', '<a href="#day-', s)
-# Fix any accidental malformed replacement above by rebuilding current class on matching anchor.
-s = s.replace('<a href="#day-', '<a href="#day-')
-s = re.sub(r'(<a)(?! class="current")([^>]+href="#'+re.escape(current_anchor)+r'"[^>]*)>', r'\1 class="current"\2>', s, count=1)
+s = re.sub(r'<a class="current" href="(#day-\d+)">', r'<a href="\1">', s)
+s, n = re.subn(r'<a href="#'+re.escape(current_anchor)+r'">', f'<a class="current" href="#{current_anchor}">', s, count=1)
+if n != 1:
+    raise RuntimeError(f'Could not mark current Hawaii day {current_anchor}')
 p.write_text(s, encoding='utf-8')
 
-# Summer page top destination navigation must never contain day or island sub-tabs.
+# Summer overview: destination tabs only. Never add island sub-tabs or dates here.
 p = ROOT / 'trips' / 'summer-2026' / 'index.html'
 s = p.read_text(encoding='utf-8')
 s = re.sub(r'<a[^>]+href="#(?:maui|day-\d+)"[^>]*>.*?</a>', '', s)
