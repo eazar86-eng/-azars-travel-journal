@@ -1,0 +1,24 @@
+trip_name: "מסע קיץ 2026"
+current_region: "הוואי"
+current_island: "מאווי"
+current_day: "10.08"
+current_day_anchor: "day-1008"
+current_day_title: "מקונה למאווי"
+current_summary: "ב 10 באוגוסט נפרדנו מקונה ומהביג איילנד, טסנו למאווי ופתחנו את הפרק הבא של המסע ב Wailea."
+current_page: "/trips/hawaii-2026/#day-1008"
+version: "20260811daily1"
+destinations:
+  - { id: "new-york", label: "ניו יורק" }
+  - { id: "seattle", label: "סיאטל" }
+  - { id: "rockies", label: "הרוקייז" }
+  - { id: "glacier", label: "גליישר" }
+  - { id: "hawaii", label: "הוואי" }
+  - { id: "los-angeles", label: "לוס אנג׳לס" }
+hawaii_days:
+  - { id: "day-0408", label: "04.08 · מגיעים להוואי" }
+  - { id: "day-0508", label: "05.08 · ים ובריכה" }
+  - { id: "day-0608", label: "06.08 · Pololū" }
+  - { id: "day-0708", label: "07.08 · הרי הגעש" }
+  - { id: "day-0808", label: "08.08 · לואו" }
+  - { id: "day-0908", label: "09.08 · Waipiʻo" }
+  - { id: "day-1008", label: "10.08 · קונה למאווי" }
