@@ -6,7 +6,7 @@ current_day_anchor: "day-1008"
 current_day_title: "מקונה למאווי"
 current_summary: "ב 10 באוגוסט נפרדנו מקונה ומהביג איילנד, טסנו למאווי ופתחנו את הפרק הבא של המסע ב Wailea."
 current_page: "/trips/hawaii-2026/#day-1008"
-version: "20260811daily1"
+version: "20260811daily2"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
