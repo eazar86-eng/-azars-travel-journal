@@ -1,0 +1,29 @@
+name: Import 10 August Maui photos
+permissions:
+  contents: write
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-day-1008-photos.yml'
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download 10 August photos
+        run: |
+          mkdir -p assets/summer-2026/day-1008
+          curl -L --fail 'https://sdmntpritalynorth.oaiusercontent.com/files/00000000-abcc-8246-85b6-5c44a375d365/raw?se=2026-08-12T03%3A47%3A36Z&sp=r&sv=2026-02-06&sr=b&scid=5f393fae-b3ba-5ba6-9222-264ac9f3144f&skoid=9b41a688-1b44-4731-856e-b0efcf3660ed&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-12T01%3A56%3A09Z&ske=2026-08-13T01%3A56%3A09Z&sks=b&skv=2026-02-06&sig=PX%2BqKaOt9kCJNn1SUDb02eeepql34G7ltxMxmMY3p7E%3D' -o assets/summer-2026/day-1008/30483de7-6f29-4810-8ee4-0997e491f941.JPG
+          curl -L --fail 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-f15c-81f4-b8ce-d826937c67ce/raw?se=2026-08-12T03%3A47%3A28Z&sp=r&sv=2026-02-06&sr=b&scid=081f34da-ac8e-5630-bbac-084c62920f7c&skoid=9b41a688-1b44-4731-856e-b0efcf3660ed&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A41%3A27Z&ske=2026-08-12T06%3A41%3A27Z&sks=b&skv=2026-02-06&sig=jDUpYTGWBLwv/a7kDWFe0v/NRjx1oFMS3VECoJL%2BuoE%3D' -o assets/summer-2026/day-1008/IMG_9887.jpeg
+          curl -L --fail 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-086c-81f4-8689-c589db344fea/raw?se=2026-08-12T03%3A47%3A32Z&sp=r&sv=2026-02-06&sr=b&scid=86cf34a6-c871-5c84-87f4-1942a82af5e8&skoid=9b41a688-1b44-4731-856e-b0efcf3660ed&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-12T01%3A56%3A09Z&ske=2026-08-13T01%3A56%3A09Z&sks=b&skv=2026-02-06&sig=Z3mfPgZheDQFWD9HwXeB60ESVra5JcQM0NpiXmilKpY%3D' -o assets/summer-2026/day-1008/IMG_9889.jpeg
+          curl -L --fail 'https://sdmntpritalynorth.oaiusercontent.com/files/00000000-5a28-8246-b9ef-7434ee5ad140/raw?se=2026-08-12T03%3A47%3A15Z&sp=r&sv=2026-02-06&sr=b&scid=46a1d8ec-fb62-555b-b62a-af067a6315e1&skoid=9b41a688-1b44-4731-856e-b0efcf3660ed&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T07%3A31%3A16Z&ske=2026-08-12T07%3A31%3A16Z&sks=b&skv=2026-02-06&sig=XCDQmZJiCzAdUKHuULeIMTQPmoLuoe4WpoNllPp2aw0%3D' -o assets/summer-2026/day-1008/IMG_9898.jpeg
+          curl -L --fail 'https://sdmntprpolandcentral.oaiusercontent.com/files/00000000-6d94-820a-a746-182de082477b/raw?se=2026-08-12T03%3A47%3A23Z&sp=r&sv=2026-02-06&sr=b&scid=21d595bb-b009-5a7c-9a6d-2d76556adb19&skoid=9b41a688-1b44-4731-856e-b0efcf3660ed&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A09%3A03Z&ske=2026-08-12T06%3A09%3A03Z&sks=b&skv=2026-02-06&sig=/IaojPOuWfAU2beALvmjC6SbGQF7oMADRCFI8sqNQfU%3D' -o assets/summer-2026/day-1008/IMG_9899.jpeg
+          curl -L --fail 'https://sdmntpritalynorth.oaiusercontent.com/files/00000000-6520-8246-9ceb-348d2e79aebf/raw?se=2026-08-12T03%3A47%3A40Z&sp=r&sv=2026-02-06&sr=b&scid=cf8ccf01-aae4-54c5-b497-822c4622d05d&skoid=9b41a688-1b44-4731-856e-b0efcf3660ed&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-12T03%3A16%3A16Z&ske=2026-08-13T03%3A16%3A16Z&sks=b&skv=2026-02-06&sig=7RheP4y/PbQSEalgXgxx52RigdFhWYDTbK4NVO%2B1QXg%3D' -o assets/summer-2026/day-1008/d1a732fe-8c74-4186-80a2-38f366e9ea5e.JPG
+      - name: Commit photos
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/day-1008
+          git commit -m 'Add 10 August Maui photos'
+          git push
