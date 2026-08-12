@@ -6,7 +6,7 @@ current_day_anchor: "day-1108"
 current_day_title: "יום הנישואין ה 15 במאווי"
 current_summary: "ב 11 באוגוסט עצרנו לרגע את קצב הטיול, בילינו יום רגוע ב Wailea Beach Resort עם הבריכות והמגלשות, ולפנות ערב חגגנו 15 שנות נישואין מול השקיעה ובארוחה איטלקית מצוינת ב Matteo’s Osteria."
 current_page: "/trips/hawaii-2026/#day-1108"
-version: "20260811anniversary1"
+version: "20260811anniversary2"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
