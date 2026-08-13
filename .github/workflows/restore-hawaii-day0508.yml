@@ -21,10 +21,13 @@ jobs:
           import re
 
           src = Path('content/summer-2026.md').read_text(encoding='utf-8')
-          start = src.find('**יום רביעי, 5 באוגוסט**')
-          end = src.find('**יום חמישי, 6 באוגוסט**', start)
-          if start < 0 or end < 0:
+          marker = '**יום רביעי, 5 באוגוסט**'
+          start = src.find(marker)
+          if start < 0:
               raise RuntimeError('Could not locate Aug 5 section in summer journal')
+          # Find the next bold day heading after Aug 5, regardless of weekday/date wording.
+          m = re.search(r'\n\*\*יום\s+[^\n]+\*\*', src[start + len(marker):])
+          end = start + len(marker) + m.start() if m else len(src)
           day = src[start:end].strip() + '\n'
           Path('content/day-0508.md').write_text(day, encoding='utf-8')
           Path('_includes/day-0508.md').write_text(day, encoding='utf-8')
@@ -39,7 +42,6 @@ jobs:
               html = html.replace(needle, insert, 1)
           p.write_text(html, encoding='utf-8')
 
-          # Current live trip pages changed today, reflect that in sitemap.
           sm = Path('sitemap.xml')
           s = sm.read_text(encoding='utf-8')
           for url in [
