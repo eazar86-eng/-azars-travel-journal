@@ -1,0 +1,161 @@
+name: Build static archive pages
+
+on:
+  push:
+    paths:
+      - '.github/workflows/static-archive-seo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install parser
+        run: python -m pip install beautifulsoup4
+      - name: Build static legacy trip pages
+        run: |
+          python - <<'PY'
+          from bs4 import BeautifulSoup, NavigableString
+          from pathlib import Path
+          import re
+
+          archive_path = Path('archive.html')
+          archive = BeautifulSoup(archive_path.read_text(encoding='utf-8'), 'html.parser')
+
+          trips = {
+              'story-florida2018': 'trips/florida-cruise-2018/index.html',
+              'story-georgia2018': 'trips/georgia-2018/index.html',
+              'story-london2019': 'trips/london-manchester-2019/index.html',
+              'story-nyc2022': 'trips/new-york-2022/index.html',
+              'story-storm2022': 'trips/florida-storm-2022/index.html',
+              'story-coast2024': 'trips/coast-to-coast-2024/index.html',
+          }
+
+          def fix_reversed_parens(text):
+              # Fix only clearly reversed parentheses that contain Hebrew characters.
+              def repl(m):
+                  inner = m.group(1)
+                  return '(' + inner + ')' if re.search(r'[\u0590-\u05FF]', inner) else m.group(0)
+              return re.sub(r'\)([^()\n]{1,90})\(', repl, text)
+
+          def normalize_images(node):
+              for img in node.select('img,source'):
+                  for attr in ('src','data-src'):
+                      v = img.get(attr)
+                      if not v:
+                          continue
+                      if v.startswith('assets/'):
+                          img[attr] = '/' + v
+                      elif v.startswith('../assets/'):
+                          img[attr] = '/' + v.replace('../','',1)
+                  if img.name == 'img':
+                      if not img.get('src') and img.get('data-src'):
+                          img['src'] = img['data-src']
+                      img['loading'] = 'lazy'
+                      img['decoding'] = 'async'
+
+          for story_id, page_path in trips.items():
+              sec = archive.find(id=story_id)
+              if not sec:
+                  raise RuntimeError(f'Missing source section {story_id}')
+              source = sec.select_one('.article-body')
+              if not source:
+                  raise RuntimeError(f'Missing article body for {story_id}')
+
+              content = BeautifulSoup(str(source), 'html.parser')
+              body = content.select_one('.article-body') or content
+              for el in body.select('script,style,.adbox'):
+                  el.decompose()
+              normalize_images(body)
+
+              # Repair common RTL punctuation corruption without rewriting the prose.
+              for node in list(body.find_all(string=True)):
+                  if isinstance(node, NavigableString) and node.parent.name not in ('script','style'):
+                      fixed = fix_reversed_parens(str(node))
+                      if fixed != str(node):
+                          node.replace_with(fixed)
+
+              # Stable heading anchors and static TOC.
+              headings = body.select('h2,h3')
+              used = set()
+              for i,h in enumerate(headings,1):
+                  hid = h.get('id') or f'chapter-{i}'
+                  base = hid
+                  n = 2
+                  while hid in used:
+                      hid = f'{base}-{n}'; n += 1
+                  used.add(hid)
+                  h['id'] = hid
+
+              page_file = Path(page_path)
+              page = BeautifulSoup(page_file.read_text(encoding='utf-8'), 'html.parser')
+              root = page.select_one('#storyContent')
+              if not root:
+                  raise RuntimeError(f'Missing storyContent in {page_path}')
+              root.clear()
+              fragment = BeautifulSoup(''.join(str(x) for x in body.contents), 'html.parser')
+              for child in list(fragment.contents):
+                  root.append(child)
+
+              # Hero is static too.
+              hero_source = sec.select_one('.story-hero img')
+              hero = page.select_one('#heroImg')
+              if hero_source and hero:
+                  src = hero_source.get('src') or hero_source.get('data-src') or ''
+                  if src.startswith('assets/'):
+                      src = '/' + src
+                  elif src.startswith('../assets/'):
+                      src = '/' + src.replace('../','',1)
+                  hero['src'] = src
+                  hero['loading'] = 'eager'
+                  hero['fetchpriority'] = 'high'
+
+              toc = page.select_one('#tocLinks')
+              if toc:
+                  toc.clear()
+                  for h in root.select('h2,h3'):
+                      a = page.new_tag('a', href='#' + h['id'])
+                      label = re.sub(r'^CHAPTER\s+\d+\s*', '', h.get_text(' ', strip=True), flags=re.I)
+                      a.string = label or 'פרק'
+                      toc.append(a)
+
+              # Content must not depend on the old JS loader anymore.
+              for s in list(page.find_all('script')):
+                  if s.get('src') == '/trips/archive-trip.js':
+                      s.decompose()
+
+              # Explicit indexing directive.
+              if not page.head.find('meta', attrs={'name':'robots'}):
+                  m = page.new_tag('meta')
+                  m['name'] = 'robots'
+                  m['content'] = 'index,follow,max-image-preview:large'
+                  page.head.append(m)
+
+              page_file.write_text(str(page), encoding='utf-8')
+
+          print('Built', len(trips), 'static archive pages')
+          PY
+      - name: Improve legacy article readability
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('trips/archive-trip.css')
+          s=p.read_text(encoding='utf-8')
+          extra='''.article-body p{max-width:72ch}.article-body h2{font-size:clamp(25px,3.4vw,34px);line-height:1.2;margin:48px 0 16px}.article-body img{max-width:100%;height:auto;border-radius:18px;margin:30px auto}.brand{display:inline-flex;align-items:center;gap:9px}.brand:before{content:"";width:34px;height:34px;flex:0 0 34px;border-radius:9px;background:url('/favicon.png') center/cover no-repeat}@media(max-width:860px){.article-body p{max-width:none}.brand:before{width:30px;height:30px;flex-basis:30px;border-radius:8px}}'''
+          if '.brand:before' not in s:
+              s += extra
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit generated static archive
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trips/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Render legacy trips as static HTML for SEO'
+            git push
+          fi
