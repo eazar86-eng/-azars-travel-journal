@@ -1,0 +1,79 @@
+name: Archive heading cleanup
+
+on:
+  push:
+    paths:
+      - '.github/workflows/archive-heading-cleanup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install parser
+        run: pip install beautifulsoup4
+      - name: Clean headings and table of contents
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from bs4 import BeautifulSoup, NavigableString
+          import re
+
+          trips = [
+              'florida-cruise-2018', 'georgia-2018', 'london-manchester-2019',
+              'new-york-2022', 'florida-storm-2022', 'coast-to-coast-2024'
+          ]
+
+          def clean_heading(t):
+              t = re.sub(r'\s+', ' ', t).strip()
+              t = re.sub(r'(\d{1,2}/\d{1,2})(?=[A-Za-z\u0590-\u05FF])', r'\1 ', t)
+              t = re.sub(r'(?<=[A-Za-z\u0590-\u05FF])\(', ' (', t)
+              t = re.sub(r'\)(?=[A-Za-z\u0590-\u05FF])', ') ', t)
+              t = re.sub(r'\s*-\s*(\d{1,2}/\d{1,2})', r' · \1 ', t)
+              t = re.sub(r'\s+', ' ', t).strip()
+              return t
+
+          for slug in trips:
+              p = Path('trips') / slug / 'index.html'
+              soup = BeautifulSoup(p.read_text(encoding='utf-8'), 'html.parser')
+              toc = soup.select_one('#tocLinks')
+              if toc:
+                  toc.clear()
+              for h in soup.select('#storyContent h2, #storyContent h3'):
+                  chapter = h.select_one('.chapter-no')
+                  raw = ''.join(str(x) for x in h.contents if x is not chapter)
+                  text = BeautifulSoup(raw, 'html.parser').get_text(' ', strip=True)
+                  text = clean_heading(text)
+                  if chapter:
+                      chapter.extract()
+                      h.clear()
+                      h.append(chapter)
+                      h.append(NavigableString(text))
+                  else:
+                      h.string = text
+                  if toc and h.get('id'):
+                      a = soup.new_tag('a', href='#' + h['id'])
+                      a.string = text
+                      toc.append(a)
+              p.write_text(str(soup), encoding='utf-8')
+
+          css = Path('trips/archive-trip.css')
+          s = css.read_text(encoding='utf-8')
+          rule = '.article-body p,.article-body li,.article-body h2,.article-body h3{unicode-bidi:plaintext}\n'
+          if 'unicode-bidi:plaintext' not in s:
+              s += '\n' + rule
+          css.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trips/archive-trip.css trips/*/index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Clean archive headings and RTL punctuation'
+            git push
+          fi
