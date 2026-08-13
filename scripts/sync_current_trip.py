@@ -131,6 +131,35 @@ if old_para in s:
     s = s.replace(old_para, new_para, 1)
 if '.story p.storyPhoto' not in s:
     s = s.replace('.galleryBlock{', '.story p.storyPhoto{margin:30px 0 38px}.story p.storyPhoto img{display:block;width:100%;max-width:100%;height:auto;max-height:680px;object-fit:contain;border-radius:20px;background:var(--paper);box-shadow:0 16px 44px rgba(45,36,24,.10)}.galleryBlock{', 1)
+
+# Flights: make the reading order unmistakable. The old two-column grid looked elegant,
+# but in an RTL page it was unclear whether to read across or down. Use one numbered
+# chronological timeline from top to bottom instead.
+s = s.replace('.tickets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}', '.tickets{display:flex;flex-direction:column;gap:12px;position:relative}')
+s = s.replace('min-height:178px;transition:transform .35s ease,box-shadow .35s ease', 'min-height:0;padding-left:132px;transition:transform .35s ease,box-shadow .35s ease')
+if '.stepBadge{' not in s:
+    s = s.replace('.ticketTop{', '.flightSection .ticket:before,.flightSection .ticket:after{display:none}.stepBadge{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:92px;border-right:1px solid #d2c5b2;text-align:center;padding-right:14px}.stepBadge span{display:block;font-size:24px;font-weight:950;line-height:1;color:#151515}.stepBadge small{display:block;margin-top:5px;font-size:9px;font-weight:900;color:#7b6e5f;letter-spacing:.05em}.ticketTop{', 1)
+if '@media(max-width:760px){' in s and '.stepBadge{position:static' not in s:
+    s = s.replace('@media(max-width:760px){', '@media(max-width:760px){.ticket{padding-left:20px}.stepBadge{position:static;transform:none;width:auto;border-right:0;border-bottom:1px solid #d2c5b2;text-align:right;padding:0 0 10px;margin-bottom:10px}.stepBadge span{display:inline;font-size:18px}.stepBadge small{display:inline;margin-right:7px}', 1)
+s = s.replace('מסלול אווירי אחד, כמה חברות תעופה והרבה מאוד קילומטרים', 'לפי הסדר הכרונולוגי, מלמעלה למטה. כל כרטיס הוא הטיסה הבאה במסע')
+flight_start = s.find('<section class="flightSection')
+if flight_start >= 0:
+    flight_end = s.find('</div></section>', flight_start)
+    if flight_end >= 0:
+        flight_end += len('</div></section>')
+        section = s[flight_start:flight_end]
+        section = re.sub(r'<div class="stepBadge">.*?</div>', '', section, flags=re.S)
+        counter = {'n': 0}
+        def add_step(match):
+            counter['n'] += 1
+            n = counter['n']
+            labels = ['טיסה ראשונה', 'טיסה שנייה', 'טיסה שלישית', 'טיסה רביעית', 'טיסה חמישית', 'טיסה שישית']
+            label_text = labels[n - 1] if n <= len(labels) else f'טיסה {n}'
+            return f'<article class="ticket"><div class="stepBadge"><span>{n}</span><small>{label_text}</small></div>'
+        section = re.sub(r'<article class="ticket">', add_step, section)
+        section = section.replace('<strong>HI</strong><span>Hawaiʻi</span>', '<strong>OGG</strong><span>Maui</span>', 1)
+        s = s[:flight_start] + section + s[flight_end:]
+
 p.write_text(s, encoding='utf-8')
 
 print(f'Synced current trip: {current_day} · {current_island} · {current_title}')
