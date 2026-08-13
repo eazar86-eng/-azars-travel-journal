@@ -4,9 +4,9 @@ current_island: "מאווי"
 current_day: "12.08"
 current_day_anchor: "day-1208"
 current_day_title: "Road to Hana"
-current_summary: "ב 12 באוגוסט יצאנו מוקדם ל Road to Hana, עצרנו ב Ho’okipa Lookout וב Twin Falls, המשכנו דרך Keʻanae ולחם הבננה, וכשלא הצלחנו להיכנס ל Waiʻānapanapa המשכנו ל Hana Beach Park, שם הילדים נהנו מהחול השחור ומהמים ולמדנו איך נוצרים חופים געשיים שחורים."
+current_summary: "ב 12 באוגוסט יצאנו בשש בבוקר ל Road to Hana. עצרנו ב Ho’okipa וב Twin Falls, אכלנו ארבע כיכרות לחם בננה ב Keʻanae מול הים, המשכנו ל Hana Beach Park ולחול השחור, סיימנו בעוד מפל מרשים וחזרנו בזהירות בכביש המפותל, הרטוב והערפילי של מאווי."
 current_page: "/trips/hawaii-2026/#day-1208"
-version: "20260812hana1"
+version: "20260812hana2"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
