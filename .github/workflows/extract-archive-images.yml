@@ -1,0 +1,70 @@
+name: Extract archive inline images
+
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-archive-images.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install parser
+        run: python -m pip install beautifulsoup4
+      - name: Extract Base64 images to assets
+        run: |
+          python - <<'PY'
+          from bs4 import BeautifulSoup
+          from pathlib import Path
+          import base64, hashlib, re
+
+          pages = [
+              'florida-cruise-2018',
+              'georgia-2018',
+              'london-manchester-2019',
+              'new-york-2022',
+              'florida-storm-2022',
+              'coast-to-coast-2024',
+          ]
+          mime_ext = {'image/jpeg':'jpg','image/jpg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'}
+          total = 0
+          for slug in pages:
+              page = Path('trips')/slug/'index.html'
+              soup = BeautifulSoup(page.read_text(encoding='utf-8'), 'html.parser')
+              outdir = Path('assets/archive-static')/slug
+              outdir.mkdir(parents=True, exist_ok=True)
+              changed = False
+              for img in soup.find_all('img'):
+                  src = img.get('src','')
+                  m = re.match(r'^data:([^;]+);base64,(.+)$', src, flags=re.S)
+                  if not m:
+                      continue
+                  mime, payload = m.group(1).lower(), m.group(2)
+                  ext = mime_ext.get(mime, 'bin')
+                  data = base64.b64decode(payload)
+                  digest = hashlib.sha1(data).hexdigest()[:16]
+                  fn = f'{digest}.{ext}'
+                  dest = outdir/fn
+                  if not dest.exists():
+                      dest.write_bytes(data)
+                  img['src'] = f'/assets/archive-static/{slug}/{fn}'
+                  changed = True
+                  total += 1
+              if changed:
+                  page.write_text(str(soup), encoding='utf-8')
+          print('Extracted', total, 'inline images')
+          PY
+      - name: Commit optimized archive pages
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trips/ assets/archive-static/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Extract legacy inline images for faster page loads'
+            git push
+          fi
