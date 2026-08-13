@@ -84,6 +84,8 @@ s = re.sub(r'<a class="current" href="(#day-\d+)">', r'<a href="\1">', s)
 s, n = re.subn(r'<a href="#' + re.escape(current_anchor) + r'">', f'<a class="current" href="#{current_anchor}">', s, count=1)
 if n != 1:
     raise RuntimeError(f'Could not mark current Hawaii day {current_anchor}')
+if '.day p.storyPhoto' not in s:
+    s = s.replace('.mauiFlag{', '.day p.storyPhoto{margin:30px 0 38px}.day p.storyPhoto img,.day p>img{display:block;width:100%;max-width:100%;height:auto;max-height:680px;object-fit:contain;border-radius:20px;background:#ece7df;box-shadow:0 16px 44px rgba(45,36,24,.10)}.mauiFlag{', 1)
 p.write_text(s, encoding='utf-8')
 
 # Summer overview: preserve approved introduction when the legacy hero structure exists,
@@ -120,6 +122,15 @@ else:
 replacement = f"Promise.all([{fetches}]).then(([{vars_text}])=>{{{body}}}).catch"
 s = s[:main_promise.start()] + replacement + s[main_promise.end():]
 s = re.sub(r'<script id="current-day-sync">.*?</script>', '', s, flags=re.S)
+
+# The Summer page has a lightweight Markdown renderer. Teach it to render image lines
+# as real responsive images instead of escaped Markdown text.
+old_para = "else{el=document.createElement('p');el.innerHTML=fmt(line);expectTitle=false}"
+new_para = "else{const im=line.match(/^!\\[([^\\]]*)\\]\\(([^)]+)\\)$/);el=document.createElement('p');if(im){el.className='storyPhoto';const img=document.createElement('img');img.src=im[2];img.alt=im[1];img.loading='lazy';el.appendChild(img)}else{el.innerHTML=fmt(line)}expectTitle=false}"
+if old_para in s:
+    s = s.replace(old_para, new_para, 1)
+if '.story p.storyPhoto' not in s:
+    s = s.replace('.galleryBlock{', '.story p.storyPhoto{margin:30px 0 38px}.story p.storyPhoto img{display:block;width:100%;max-width:100%;height:auto;max-height:680px;object-fit:contain;border-radius:20px;background:var(--paper);box-shadow:0 16px 44px rgba(45,36,24,.10)}.galleryBlock{', 1)
 p.write_text(s, encoding='utf-8')
 
 print(f'Synced current trip: {current_day} · {current_island} · {current_title}')
