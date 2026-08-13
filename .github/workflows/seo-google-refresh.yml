@@ -1,0 +1,62 @@
+name: SEO Google refresh
+on:
+  push:
+    paths:
+      - '.github/workflows/seo-google-refresh.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-seo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Improve homepage Google signals
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Google recommends a stable favicon URL. Keep explicit browser + Search links.
+          s = re.sub(r'<link rel="icon"[^>]*>', '<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">', s, count=1)
+          s = re.sub(r'<link rel="shortcut icon"[^>]*>', '<link rel="shortcut icon" href="/favicon.ico">', s, count=1)
+          s = re.sub(r'<link rel="apple-touch-icon"[^>]*>', '<link rel="apple-touch-icon" href="/favicon.png">', s, count=1)
+
+          s = re.sub(r'<title>.*?</title>', '<title>Azar’s Travel | יומן טיולים משפחתי, מסלולים והמלצות</title>', s, count=1)
+          s = re.sub(r'<meta name="description" content="[^"]*">', '<meta name="description" content="Azar’s Travel הוא יומן הטיולים המשפחתי של משפחת עזר: מסלולים אמיתיים, תמונות, מלונות, מסעדות, טיפים והמלצות מטיולים בארץ ובעולם.">', s, count=1)
+
+          if '<meta name="robots"' not in s:
+              s = s.replace('<link rel="canonical" href="https://azarstravel.com/">', '<link rel="canonical" href="https://azarstravel.com/"><meta name="robots" content="index,follow,max-image-preview:large">', 1)
+
+          schema = '''<script type="application/ld+json">{
+            "@context":"https://schema.org",
+            "@type":"WebSite",
+            "name":"Azar’s Travel",
+            "alternateName":["Azars Travel","azarstravel.com"],
+            "url":"https://azarstravel.com/"
+          }</script>'''
+          if '"@type":"WebSite"' not in s and '"@type": "WebSite"' not in s:
+              s = s.replace('<style>', schema + '<style>', 1)
+
+          p.write_text(s, encoding='utf-8')
+
+          sm = Path('sitemap.xml')
+          x = sm.read_text(encoding='utf-8')
+          for url in [
+              'https://azarstravel.com/',
+              'https://azarstravel.com/trips/summer-2026/',
+              'https://azarstravel.com/trips/hawaii-2026/'
+          ]:
+              x = re.sub(r'(<url><loc>'+re.escape(url)+r'</loc><lastmod>)\d{4}-\d{2}-\d{2}(</lastmod>)', r'\g<1>2026-08-13\2', x)
+          sm.write_text(x, encoding='utf-8')
+          PY
+      - name: Commit SEO refresh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html sitemap.xml
+          git diff --cached --quiet || git commit -m "Refresh Google search metadata and favicon signals"
+          git push
