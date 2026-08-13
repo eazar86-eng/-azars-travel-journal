@@ -1,0 +1,57 @@
+name: Archive brand consistency
+
+on:
+  push:
+    paths:
+      - '.github/workflows/archive-brand-consistency.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add AT logo to legacy trip headers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          trips = [
+              'florida-cruise-2018',
+              'georgia-2018',
+              'london-manchester-2019',
+              'new-york-2022',
+              'florida-storm-2022',
+              'coast-to-coast-2024',
+          ]
+          for slug in trips:
+              p = Path('trips') / slug / 'index.html'
+              s = p.read_text(encoding='utf-8')
+              if 'class="brandLogo"' not in s:
+                  s = re.sub(
+                      r'<a class="brand" href="/">\s*Azar’s Travel\s*</a>',
+                      '<a class="brand" href="/"><img class="brandLogo" src="/favicon.png" alt=""><span>Azar’s Travel</span></a>',
+                      s,
+                      count=1,
+                  )
+              p.write_text(s, encoding='utf-8')
+
+          css = Path('trips/archive-trip.css')
+          s = css.read_text(encoding='utf-8')
+          if '.brandLogo{' not in s:
+              s += '\n.brand{display:inline-flex!important;align-items:center;gap:9px;direction:ltr}.brandLogo{width:34px;height:34px;border-radius:9px;object-fit:cover;display:block;flex:0 0 34px}@media(max-width:800px){.brandLogo{width:30px;height:30px;flex-basis:30px;border-radius:8px}}\n'
+          css.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit archive branding
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trips/archive-trip.css trips/*/index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Show AT logo on legacy trip pages'
+            git push
+          fi
