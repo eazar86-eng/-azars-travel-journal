@@ -115,8 +115,10 @@ if f'/content/{include_name}' not in fetches:
     fetches = fetches + ',' + current_fetch
     vars_text = vars_text + ',' + var_name
     body = body.replace('addHawaiiDays();', f'render({var_name},root);addHawaiiDays();', 1)
-    replacement = f"Promise.all([{fetches}]).then(([{vars_text}])=>{{{body}}}).catch"
-    s = s[:main_promise.start()] + replacement + s[main_promise.end():]
+else:
+    fetches = re.sub(r"fetch\('/content/" + re.escape(include_name) + r"\?v=[^']*'\)\.then\(r=>r\.text\(\)\)", current_fetch, fetches)
+replacement = f"Promise.all([{fetches}]).then(([{vars_text}])=>{{{body}}}).catch"
+s = s[:main_promise.start()] + replacement + s[main_promise.end():]
 s = re.sub(r'<script id="current-day-sync">.*?</script>', '', s, flags=re.S)
 p.write_text(s, encoding='utf-8')
 
