@@ -86,14 +86,14 @@ if n != 1:
     raise RuntimeError(f'Could not mark current Hawaii day {current_anchor}')
 p.write_text(s, encoding='utf-8')
 
-# Summer overview: preserve approved introduction and make the current day part of the main renderer.
+# Summer overview: preserve approved introduction when the legacy hero structure exists,
+# but do not fail if the page has already moved to the newer magazine layout.
 p = ROOT / 'trips' / 'summer-2026' / 'index.html'
 s = p.read_text(encoding='utf-8')
-s = replace_once(s, r'(<div class="kicker">AZAR FAMILY · SUMMER 2026</div><h1>מסע קיץ 2026</h1>)<p>.*?</p>', lambda m: m.group(1) + f'<p>{SUMMER_INTRO}</p>', 'approved summer introduction')
+s, _ = re.subn(r'(<div class="kicker">AZAR FAMILY · SUMMER 2026</div><h1>מסע קיץ 2026</h1>)<p>.*?</p>', lambda m: m.group(1) + f'<p>{SUMMER_INTRO}</p>', s, count=1, flags=re.S)
 summer_day_links = '<a href="#hawaii">04.08</a>' + ''.join(f'<a href="#{day_id}">{day_label}</a>' for day_id, day_label in hawaii_days if day_id != 'day-0408')
 s = replace_once(s, r"(function addHawaiiDays\(\)\{.*?nav\.innerHTML=)'[^']*'", lambda m: m.group(1) + repr(summer_day_links), 'summer Hawaii day rail')
 
-# Normalize any old dotted anchor token, then ensure the slash-form token exists.
 wrong_anchor_token = f"['{current_day}','{current_anchor}']"
 anchor_token = f"['{current_day_slash}','{current_anchor}']"
 if wrong_anchor_token != anchor_token:
