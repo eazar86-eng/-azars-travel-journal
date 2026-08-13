@@ -1,12 +1,12 @@
 trip_name: "מסע קיץ 2026"
 current_region: "הוואי"
 current_island: "מאווי"
-current_day: "11.08"
-current_day_anchor: "day-1108"
-current_day_title: "יום הנישואין ה 15 במאווי"
-current_summary: "ב 11 באוגוסט עצרנו לרגע את קצב הטיול, בילינו יום רגוע ב Wailea Beach Resort עם הבריכות והמגלשות, ולפנות ערב חגגנו 15 שנות נישואין מול השקיעה ובארוחה איטלקית מצוינת ב Matteo’s Osteria."
-current_page: "/trips/hawaii-2026/#day-1108"
-version: "20260811anniversary5"
+current_day: "12.08"
+current_day_anchor: "day-1208"
+current_day_title: "Road to Hana"
+current_summary: "ב 12 באוגוסט יצאנו מוקדם ל Road to Hana, עצרנו ב Ho’okipa Lookout וב Twin Falls, המשכנו דרך Keʻanae ולחם הבננה, וכשלא הצלחנו להיכנס ל Waiʻānapanapa המשכנו ל Hana Beach Park, שם הילדים נהנו מהחול השחור ומהמים ולמדנו איך נוצרים חופים געשיים שחורים."
+current_page: "/trips/hawaii-2026/#day-1208"
+version: "20260812hana1"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
@@ -23,3 +23,4 @@ hawaii_days:
   - { id: "day-0908", label: "09.08 · Waipiʻo" }
   - { id: "day-1008", label: "10.08 · קונה למאווי" }
   - { id: "day-1108", label: "11.08 · יום הנישואין ה 15" }
+  - { id: "day-1208", label: "12.08 · Road to Hana" }
