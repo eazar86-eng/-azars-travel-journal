@@ -6,7 +6,7 @@ current_day_anchor: "day-1208"
 current_day_title: "Road to Hana"
 current_summary: "ב 12 באוגוסט יצאנו בשש בבוקר ל Road to Hana. עצרנו ב Ho’okipa וב Twin Falls, אכלנו ארבע כיכרות לחם בננה ב Keʻanae מול הים, המשכנו ל Hana Beach Park ולחול השחור, סיימנו בעוד מפל מרשים וחזרנו בזהירות בכביש המפותל, הרטוב והערפילי של מאווי."
 current_page: "/trips/hawaii-2026/#day-1208"
-version: "20260812hana2"
+version: "20260812hana3"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
