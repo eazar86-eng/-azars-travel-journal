@@ -6,7 +6,7 @@ current_day_anchor: "day-1308"
 current_day_title: "נפרדים ממאווי"
 current_summary: "ב 13 באוגוסט הגיע היום האחרון שלנו במאווי. נפרדנו מהמלון ומהנוף, המשכנו לשדה התעופה ועלינו לטיסת הלילה ללוס אנג׳לס. מהחלון ראינו את שכבת העננים ואת צבעי השקיעה האחרונים מעל האוקיינוס, סיום יפה לפרק של הוואי."
 current_page: "/trips/hawaii-2026/#day-1308"
-version: "20260813mauifarewell2"
+version: "20260813mauifarewell3"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
