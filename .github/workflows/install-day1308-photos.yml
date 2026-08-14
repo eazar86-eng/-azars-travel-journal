@@ -1,0 +1,42 @@
+name: Install Aug 13 photos
+
+on:
+  push:
+    paths:
+      - 'tmp/day1308/**'
+      - '.github/workflows/install-day1308-photos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore verified WebP photos
+        run: |
+          cat tmp/day1308/part*.txt | tr -d '\n\r ' | base64 -d > /tmp/day1308.zip
+          unzip -t /tmp/day1308.zip
+          mkdir -p assets/summer-2026/day-1308
+          unzip -o /tmp/day1308.zip -d assets/summer-2026/day-1308
+          rm -rf tmp/day1308
+          rm -f assets/summer-2026/day-1308/above-the-clouds.jpeg
+          rm -f assets/summer-2026/day-1308/maui-to-la.jpeg
+          rm -f assets/summer-2026/day-1308/maui-last-evening.jpeg
+          sed -i 's/maui-last-evening\.jpeg/maui-last-evening.webp/g; s/above-the-clouds\.jpeg/above-the-clouds.webp/g; s/maui-to-la\.jpeg/maui-to-la.webp/g' content/day-1308.md _includes/day-1308.md
+          sed -i 's/version: "20260813mauifarewell2"/version: "20260813mauifarewell3"/' _data/current_trip.yml
+      - name: Verify restored files
+        run: |
+          test -s assets/summer-2026/day-1308/maui-last-evening.webp
+          test -s assets/summer-2026/day-1308/above-the-clouds.webp
+          test -s assets/summer-2026/day-1308/maui-to-la.webp
+          file assets/summer-2026/day-1308/*.webp
+      - name: Commit restored photos and references
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/day-1308 content/day-1308.md _includes/day-1308.md _data/current_trip.yml tmp/day1308
+          git commit -m 'Restore Aug 13 photos and update references'
+          git push
