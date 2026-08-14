@@ -1,12 +1,12 @@
 trip_name: "מסע קיץ 2026"
 current_region: "הוואי"
 current_island: "מאווי"
-current_day: "12.08"
-current_day_anchor: "day-1208"
-current_day_title: "Road to Hana"
-current_summary: "ב 12 באוגוסט יצאנו בשש בבוקר ל Road to Hana. עצרנו ב Ho’okipa וב Twin Falls, אכלנו ארבע כיכרות לחם בננה ב Keʻanae מול הים, המשכנו ל Hana Beach Park ולחול השחור, סיימנו בעוד מפל מרשים וחזרנו בזהירות בכביש המפותל, הרטוב והערפילי של מאווי."
-current_page: "/trips/hawaii-2026/#day-1208"
-version: "20260812hana5"
+current_day: "13.08"
+current_day_anchor: "day-1308"
+current_day_title: "נפרדים ממאווי"
+current_summary: "ב 13 באוגוסט הגיע היום האחרון שלנו במאווי. נפרדנו מהמלון ומהנוף, המשכנו לשדה התעופה ועלינו לטיסת הלילה ללוס אנג׳לס. מהחלון ראינו את שכבת העננים ואת צבעי השקיעה האחרונים מעל האוקיינוס, סיום יפה לפרק של הוואי."
+current_page: "/trips/hawaii-2026/#day-1308"
+version: "20260813mauifarewell1"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
@@ -24,3 +24,4 @@ hawaii_days:
   - { id: "day-1008", label: "10.08 · קונה למאווי" }
   - { id: "day-1108", label: "11.08 · יום הנישואין ה 15" }
   - { id: "day-1208", label: "12.08 · Road to Hana" }
+  - { id: "day-1308", label: "13.08 · נפרדים ממאווי" }
