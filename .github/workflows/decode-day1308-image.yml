@@ -1,0 +1,27 @@
+name: Decode day1308 hotel image
+
+on:
+  push:
+    paths:
+      - 'assets/summer-2026/day-1308/maui-last-evening.jpeg.b64'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode image
+        run: |
+          base64 -d assets/summer-2026/day-1308/maui-last-evening.jpeg.b64 > assets/summer-2026/day-1308/maui-last-evening.jpeg
+          rm assets/summer-2026/day-1308/maui-last-evening.jpeg.b64
+      - name: Commit decoded image
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/day-1308/
+          git commit -m 'Decode Maui farewell image'
+          git push
