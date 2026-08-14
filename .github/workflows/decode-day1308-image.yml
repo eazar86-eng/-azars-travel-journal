@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'assets/summer-2026/day-1308/maui-last-evening.jpeg.b64'
+      - '.github/workflows/decode-day1308-image.yml'
   workflow_dispatch:
 
 permissions:
