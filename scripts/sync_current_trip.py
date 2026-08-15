@@ -14,37 +14,38 @@ def parse_simple_yaml(text):
     for line in text.splitlines():
         if not line or line.startswith(' ') or line.lstrip().startswith('-') or ':' not in line:
             continue
-        k, v = line.split(':', 1)
-        out[k.strip()] = v.strip().strip('"')
+        key, value = line.split(':', 1)
+        out[key.strip()] = value.strip().strip('"')
     return out
 
 
-def parse_hawaii_days(text):
+def parse_days(text, section):
     days = []
-    in_days = False
+    active = False
     for line in text.splitlines():
-        if line.strip() == 'hawaii_days:':
-            in_days = True
+        if line.strip() == f'{section}:':
+            active = True
             continue
-        if in_days:
+        if active:
             if line and not line.startswith(' '):
                 break
-            m = re.search(r'id:\s*"([^"]+)".*label:\s*"([^"]+)"', line)
-            if m:
-                days.append((m.group(1), m.group(2)))
+            match = re.search(r'id:\s*"([^"]+)".*label:\s*"([^"]+)"', line)
+            if match:
+                days.append((match.group(1), match.group(2)))
     return days
 
 
 def replace_once(text, pattern, repl, label):
-    new, n = re.subn(pattern, repl, text, count=1, flags=re.S)
-    if n != 1:
-        raise RuntimeError(f'Could not update {label}: found {n} matches')
-    return new
+    updated, count = re.subn(pattern, repl, text, count=1, flags=re.S)
+    if count != 1:
+        raise RuntimeError(f'Could not update {label}: found {count} matches')
+    return updated
 
 
 yaml_text = DATA.read_text(encoding='utf-8')
 data = parse_simple_yaml(yaml_text)
-hawaii_days = parse_hawaii_days(yaml_text)
+hawaii_days = parse_days(yaml_text, 'hawaii_days')
+current_region = data.get('current_region', '')
 current_island = data['current_island']
 current_day = data['current_day']
 current_day_slash = current_day.replace('.', '/')
@@ -54,42 +55,39 @@ current_summary = data['current_summary']
 current_page = data['current_page']
 version = data.get('version', 'daily')
 include_name = current_anchor + '.md'
-label = f'{current_day} · {current_title}'
 
-# Home page: keep the approved editorial introduction fixed.
+# Home page
 p = ROOT / 'index.html'
 s = p.read_text(encoding='utf-8')
 s = replace_once(s, r'(<div class="eyebrow">AZAR’S TRAVEL · FAMILY JOURNAL</div>)<h1>.*?</h1><p>.*?</p>', lambda m: m.group(1) + f'<h1>{HOME_HERO_TITLE}</h1><p>{HOME_HERO_INTRO}</p>', 'approved home introduction')
 s = replace_once(s, r'<div class="head"><h2>עכשיו בדרך</h2><p>.*?</p></div>', f'<div class="head"><h2>עכשיו בדרך</h2><p>{current_summary} התחנה הנוכחית שלנו היא <strong>{current_island}</strong>.</p></div>', 'home current summary')
-s = replace_once(s, r'<div class="tag">[^<]*CURRENT STOP</div>', f'<div class="tag">{current_island.upper()} · HAWAIʻI · CURRENT STOP</div>', 'home current tag')
+s = replace_once(s, r'<div class="tag">[^<]*CURRENT STOP</div>', f'<div class="tag">{current_island.upper()} · CURRENT STOP</div>', 'home current tag')
 s = replace_once(s, r'<h3>פרק חדש: .*?</h3>', f'<h3>פרק חדש: {current_island}</h3>', 'home current title')
 s = replace_once(s, r'<a class="btn" href="[^"]+">[^<]+</a>', f'<a class="btn" href="{current_page}">ליום {current_day} ביומן</a>', 'home current link')
 s = replace_once(s, r'(<div class="featureCopy">.*?<h3>.*?</h3>)<p>.*?</p>(<a class="btn")', lambda m: m.group(1) + f'<p>{current_summary}</p>' + m.group(2), 'home feature current summary')
 p.write_text(s, encoding='utf-8')
 
-# Hawaii page.
-p = ROOT / 'trips' / 'hawaii-2026' / 'index.html'
-s = p.read_text(encoding='utf-8')
-s = s.replace('\x01', '</div></nav><main class="story">')
-s = replace_once(s, r'<span class="currentBadge">.*?</span>', f'<span class="currentBadge">עכשיו במסע: {current_island}</span>', 'hawaii current badge')
-s = replace_once(s, r'(<div class="eyebrow">HAWAIʻI.*?</div><h1>.*?</h1>)<p>.*?</p>(<span class="currentBadge">)', lambda m: m.group(1) + f'<p>{current_summary}</p>' + m.group(2), 'hawaii current introduction')
-day_links = ''.join(f'<a href="#{day_id}">{day_label}</a>' for day_id, day_label in hawaii_days)
-s = replace_once(s, r'(<nav class="days" aria-label="ימי הוואי"><div class="daysIn">).*?(</div></nav>)', lambda m: m.group(1) + day_links + m.group(2), 'hawaii day tabs')
-if f'id="{current_anchor}"' not in s:
-    day_section = f'<section id="{current_anchor}" class="day"><div class="mauiFlag">MAUI · התחנה הנוכחית</div>{{% capture current_day_content %}}{{% include {include_name} %}}{{% endcapture %}}{{{{ current_day_content | markdownify }}}}</section>'
-    s = replace_once(s, r'</main>', day_section + '</main>', 'hawaii current day section')
-s = re.sub(r'<div class="mauiFlag">MAUI · התחנה הנוכחית</div>', '', s)
-s = s.replace(f'<section id="{current_anchor}" class="day">', f'<section id="{current_anchor}" class="day"><div class="mauiFlag">MAUI · התחנה הנוכחית</div>', 1)
-s = re.sub(r'<a class="current" href="(#day-\d+)">', r'<a href="\1">', s)
-s, n = re.subn(r'<a href="#' + re.escape(current_anchor) + r'">', f'<a class="current" href="#{current_anchor}">', s, count=1)
-if n != 1:
-    raise RuntimeError(f'Could not mark current Hawaii day {current_anchor}')
-if '.day p.storyPhoto' not in s:
-    s = s.replace('.mauiFlag{', '.day p.storyPhoto{margin:30px 0 38px}.day p.storyPhoto img,.day p>img{display:block;width:100%;max-width:100%;height:auto;max-height:680px;object-fit:contain;border-radius:20px;background:#ece7df;box-shadow:0 16px 44px rgba(45,36,24,.10)}.mauiFlag{', 1)
-p.write_text(s, encoding='utf-8')
+# Hawaii page is updated only while Hawaii is the current region.
+if current_region == 'הוואי':
+    p = ROOT / 'trips' / 'hawaii-2026' / 'index.html'
+    s = p.read_text(encoding='utf-8')
+    s = s.replace('\x01', '</div></nav><main class="story">')
+    s = replace_once(s, r'<span class="currentBadge">.*?</span>', f'<span class="currentBadge">עכשיו במסע: {current_island}</span>', 'hawaii current badge')
+    s = replace_once(s, r'(<div class="eyebrow">HAWAIʻI.*?</div><h1>.*?</h1>)<p>.*?</p>(<span class="currentBadge">)', lambda m: m.group(1) + f'<p>{current_summary}</p>' + m.group(2), 'hawaii current introduction')
+    day_links = ''.join(f'<a href="#{day_id}">{day_label}</a>' for day_id, day_label in hawaii_days)
+    s = replace_once(s, r'(<nav class="days" aria-label="ימי הוואי"><div class="daysIn">).*?(</div></nav>)', lambda m: m.group(1) + day_links + m.group(2), 'hawaii day tabs')
+    if f'id="{current_anchor}"' not in s:
+        day_section = f'<section id="{current_anchor}" class="day"><div class="mauiFlag">MAUI · התחנה הנוכחית</div>{{% capture current_day_content %}}{{% include {include_name} %}}{{% endcapture %}}{{{{ current_day_content | markdownify }}}}</section>'
+        s = replace_once(s, r'</main>', day_section + '</main>', 'hawaii current day section')
+    s = re.sub(r'<div class="mauiFlag">MAUI · התחנה הנוכחית</div>', '', s)
+    s = s.replace(f'<section id="{current_anchor}" class="day">', f'<section id="{current_anchor}" class="day"><div class="mauiFlag">MAUI · התחנה הנוכחית</div>', 1)
+    s = re.sub(r'<a class="current" href="(#day-\d+)">', r'<a href="\1">', s)
+    s, count = re.subn(r'<a href="#' + re.escape(current_anchor) + r'">', f'<a class="current" href="#{current_anchor}">', s, count=1)
+    if count != 1:
+        raise RuntimeError(f'Could not mark current Hawaii day {current_anchor}')
+    p.write_text(s, encoding='utf-8')
 
-# Summer overview: preserve approved introduction when the legacy hero structure exists,
-# but do not fail if the page has already moved to the newer magazine layout.
+# Summer overview
 p = ROOT / 'trips' / 'summer-2026' / 'index.html'
 s = p.read_text(encoding='utf-8')
 s, _ = re.subn(r'(<div class="kicker">AZAR FAMILY · SUMMER 2026</div><h1>מסע קיץ 2026</h1>)<p>.*?</p>', lambda m: m.group(1) + f'<p>{SUMMER_INTRO}</p>', s, count=1, flags=re.S)
@@ -122,44 +120,6 @@ else:
 replacement = f"Promise.all([{fetches}]).then(([{vars_text}])=>{{{body}}}).catch"
 s = s[:main_promise.start()] + replacement + s[main_promise.end():]
 s = re.sub(r'<script id="current-day-sync">.*?</script>', '', s, flags=re.S)
-
-# The Summer page has a lightweight Markdown renderer. Teach it to render image lines
-# as real responsive images instead of escaped Markdown text.
-old_para = "else{el=document.createElement('p');el.innerHTML=fmt(line);expectTitle=false}"
-new_para = "else{const im=line.match(/^!\\[([^\\]]*)\\]\\(([^)]+)\\)$/);el=document.createElement('p');if(im){el.className='storyPhoto';const img=document.createElement('img');img.src=im[2];img.alt=im[1];img.loading='lazy';el.appendChild(img)}else{el.innerHTML=fmt(line)}expectTitle=false}"
-if old_para in s:
-    s = s.replace(old_para, new_para, 1)
-if '.story p.storyPhoto' not in s:
-    s = s.replace('.galleryBlock{', '.story p.storyPhoto{margin:30px 0 38px}.story p.storyPhoto img{display:block;width:100%;max-width:100%;height:auto;max-height:680px;object-fit:contain;border-radius:20px;background:var(--paper);box-shadow:0 16px 44px rgba(45,36,24,.10)}.galleryBlock{', 1)
-
-# Flights: make the reading order unmistakable. The old two-column grid looked elegant,
-# but in an RTL page it was unclear whether to read across or down. Use one numbered
-# chronological timeline from top to bottom instead.
-s = s.replace('.tickets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}', '.tickets{display:flex;flex-direction:column;gap:12px;position:relative}')
-s = s.replace('min-height:178px;transition:transform .35s ease,box-shadow .35s ease', 'min-height:0;padding-left:132px;transition:transform .35s ease,box-shadow .35s ease')
-if '.stepBadge{' not in s:
-    s = s.replace('.ticketTop{', '.flightSection .ticket:before,.flightSection .ticket:after{display:none}.stepBadge{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:92px;border-right:1px solid #d2c5b2;text-align:center;padding-right:14px}.stepBadge span{display:block;font-size:24px;font-weight:950;line-height:1;color:#151515}.stepBadge small{display:block;margin-top:5px;font-size:9px;font-weight:900;color:#7b6e5f;letter-spacing:.05em}.ticketTop{', 1)
-if '@media(max-width:760px){' in s and '.stepBadge{position:static' not in s:
-    s = s.replace('@media(max-width:760px){', '@media(max-width:760px){.ticket{padding-left:20px}.stepBadge{position:static;transform:none;width:auto;border-right:0;border-bottom:1px solid #d2c5b2;text-align:right;padding:0 0 10px;margin-bottom:10px}.stepBadge span{display:inline;font-size:18px}.stepBadge small{display:inline;margin-right:7px}', 1)
-s = s.replace('מסלול אווירי אחד, כמה חברות תעופה והרבה מאוד קילומטרים', 'לפי הסדר הכרונולוגי, מלמעלה למטה. כל כרטיס הוא הטיסה הבאה במסע')
-flight_start = s.find('<section class="flightSection')
-if flight_start >= 0:
-    flight_end = s.find('</div></section>', flight_start)
-    if flight_end >= 0:
-        flight_end += len('</div></section>')
-        section = s[flight_start:flight_end]
-        section = re.sub(r'<div class="stepBadge">.*?</div>', '', section, flags=re.S)
-        counter = {'n': 0}
-        def add_step(match):
-            counter['n'] += 1
-            n = counter['n']
-            labels = ['טיסה ראשונה', 'טיסה שנייה', 'טיסה שלישית', 'טיסה רביעית', 'טיסה חמישית', 'טיסה שישית']
-            label_text = labels[n - 1] if n <= len(labels) else f'טיסה {n}'
-            return f'<article class="ticket"><div class="stepBadge"><span>{n}</span><small>{label_text}</small></div>'
-        section = re.sub(r'<article class="ticket">', add_step, section)
-        section = section.replace('<strong>HI</strong><span>Hawaiʻi</span>', '<strong>OGG</strong><span>Maui</span>', 1)
-        s = s[:flight_start] + section + s[flight_end:]
-
 p.write_text(s, encoding='utf-8')
 
 print(f'Synced current trip: {current_day} · {current_island} · {current_title}')
