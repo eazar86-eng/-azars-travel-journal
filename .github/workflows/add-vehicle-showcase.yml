@@ -33,9 +33,7 @@ jobs:
           headers={'User-Agent':'Mozilla/5.0'}
 
           sources={
-            'suburban':[
-              'https://media.chevrolet.com/Pages/news/ca/en/2023/nov/1129-tahoe-suburban/jcr%3Acontent/rightpar/galleryphotogrid.html',
-              'https://media.chevrolet.com/Pages/news/mx/es/2023/nov/1129-tahoe-suburban/jcr%3Acontent/rightpar/galleryphotogrid.html'],
+            'suburban':['https://media.chevrolet.com/Pages/galleries/ME/EN/chevrolet/suv/2016/2016-chevrolet-suburban.html'],
             'tahoe':['https://media.chevrolet.com/Pages/galleries/EC/2023/tahoe.html'],
             'traverse':['https://media.chevrolet.com/Pages/galleries/ME/EN/chevrolet/crossover-suv/2024/2024-traverse.html'],
             'pathfinder':['https://www.nissanusa.com/vehicles/crossovers-suvs/pathfinder/gallery/exterior.html']
@@ -53,7 +51,7 @@ jobs:
               tag=soup.find(*prop)
               if tag and tag.get('content'): candidates.append(tag['content'])
             for img in soup.find_all('img'):
-              for key in ('src','data-src','data-lazy-src'):
+              for key in ('src','data-src','data-lazy-src','data-responsive-img'):
                 u=img.get(key)
                 if u and any(x in u.lower() for x in ('.jpg','.jpeg','.png','.webp')):
                   candidates.append(u)
@@ -61,9 +59,9 @@ jobs:
               u=abs_url(page,u)
               try:
                 rr=requests.get(u,headers=headers,timeout=30)
-                if rr.ok and len(rr.content)>50000 and rr.headers.get('content-type','').startswith('image/'):
+                if rr.ok and len(rr.content)>30000 and rr.headers.get('content-type','').startswith('image/'):
                   im=Image.open(io.BytesIO(rr.content)).convert('RGB')
-                  if im.width>=700 and im.height>=350:
+                  if im.width>=650 and im.height>=300:
                     return im,u
               except Exception:
                 pass
@@ -92,7 +90,6 @@ jobs:
             s=path.read_text(encoding='utf-8')
             if '/* Vehicle showcase · Summer 2026 */' not in s:
               s=s.replace('</style>',css+'</style>',1)
-            # remove previous showcase if rerun
             s=re.sub(r'<div class="tripPulse reveal">6 טיסות.*?</section>','',s,flags=re.S)
             s=re.sub(r'<section class="hawaiiVehicleSection">.*?</section>','',s,flags=re.S)
             if kind=='summer':
