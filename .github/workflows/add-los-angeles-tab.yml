@@ -1,0 +1,41 @@
+name: Add Los Angeles destination tab
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-los-angeles-tab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Los Angeles tab to Summer 2026 destination rail
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('trips/summer-2026/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<a href="#hawaii">הוואי</a></div></nav>'
+          new = '<a href="#hawaii">הוואי</a><a href="#day-1408">לוס אנג׳לס</a></div></nav>'
+          if '<a href="#day-1408">לוס אנג׳לס</a>' not in s:
+              if old not in s:
+                  raise SystemExit('Destination rail pattern not found')
+              s = s.replace(old, new, 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit change
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add trips/summer-2026/index.html
+          git commit -m "Add Los Angeles destination tab"
+          git push
