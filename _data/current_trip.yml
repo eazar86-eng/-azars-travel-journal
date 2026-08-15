@@ -1,12 +1,12 @@
 trip_name: "מסע קיץ 2026"
-current_region: "הוואי"
-current_island: "מאווי"
-current_day: "13.08"
-current_day_anchor: "day-1308"
-current_day_title: "נפרדים ממאווי"
-current_summary: "ב 13 באוגוסט הגיע היום האחרון שלנו במאווי. נפרדנו מהמלון ומהנוף, המשכנו לשדה התעופה ועלינו לטיסת הלילה ללוס אנג׳לס. מהחלון ראינו את שכבת העננים ואת צבעי השקיעה האחרונים מעל האוקיינוס, סיום יפה לפרק של הוואי."
-current_page: "/trips/hawaii-2026/#day-1308"
-version: "20260813mauifarewell3"
+current_region: "לוס אנג׳לס"
+current_island: "לוס אנג׳לס"
+current_day: "14.08"
+current_day_anchor: "day-1408"
+current_day_title: "נוחתים בלוס אנג׳לס"
+current_summary: "ב 14 באוגוסט נחתנו בלוס אנג׳לס, חזרנו ל Marriott LAX שזכור לנו לטובה, השלמנו כמה שעות שינה, אספנו את ה Chevrolet Traverse שלנו ויצאנו דרך הפקקים של העיר ל Costa Mesa ולארוחת ערב אהובה ב Maggiano’s, אפילו באותו שולחן שבו ישבנו לפני שנתיים."
+current_page: "/trips/summer-2026/#day-1408"
+version: "20260814losangeles1"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
