@@ -1,0 +1,119 @@
+name: Add vehicle showcase
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/add-vehicle-showcase.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 pillow
+      - name: Build vehicle showcase
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, io, requests
+          from bs4 import BeautifulSoup
+          from PIL import Image
+
+          root=Path('.')
+          out=root/'assets'/'summer-2026'/'vehicles'
+          out.mkdir(parents=True,exist_ok=True)
+          headers={'User-Agent':'Mozilla/5.0'}
+
+          sources={
+            'suburban':[
+              'https://media.chevrolet.com/Pages/news/ca/en/2023/nov/1129-tahoe-suburban/jcr%3Acontent/rightpar/galleryphotogrid.html',
+              'https://media.chevrolet.com/Pages/news/mx/es/2023/nov/1129-tahoe-suburban/jcr%3Acontent/rightpar/galleryphotogrid.html'],
+            'tahoe':['https://media.chevrolet.com/Pages/galleries/EC/2023/tahoe.html'],
+            'traverse':['https://media.chevrolet.com/Pages/galleries/ME/EN/chevrolet/crossover-suv/2024/2024-traverse.html'],
+            'pathfinder':['https://www.nissanusa.com/vehicles/crossovers-suvs/pathfinder/gallery/exterior.html']
+          }
+
+          def abs_url(page,u):
+            from urllib.parse import urljoin
+            return urljoin(page,u)
+
+          def choose_image(page):
+            r=requests.get(page,headers=headers,timeout=30); r.raise_for_status()
+            soup=BeautifulSoup(r.text,'html.parser')
+            candidates=[]
+            for prop in [('meta',{'property':'og:image'}),('meta',{'name':'twitter:image'})]:
+              tag=soup.find(*prop)
+              if tag and tag.get('content'): candidates.append(tag['content'])
+            for img in soup.find_all('img'):
+              for key in ('src','data-src','data-lazy-src'):
+                u=img.get(key)
+                if u and any(x in u.lower() for x in ('.jpg','.jpeg','.png','.webp')):
+                  candidates.append(u)
+            for u in candidates:
+              u=abs_url(page,u)
+              try:
+                rr=requests.get(u,headers=headers,timeout=30)
+                if rr.ok and len(rr.content)>50000 and rr.headers.get('content-type','').startswith('image/'):
+                  im=Image.open(io.BytesIO(rr.content)).convert('RGB')
+                  if im.width>=700 and im.height>=350:
+                    return im,u
+              except Exception:
+                pass
+            raise RuntimeError('No usable image found: '+page)
+
+          used={}
+          for name,pages in sources.items():
+            err=None
+            for page in pages:
+              try:
+                im,u=choose_image(page)
+                im.thumbnail((1600,1000))
+                im.save(out/f'{name}.jpg','JPEG',quality=84,optimize=True)
+                used[name]=u
+                break
+              except Exception as e: err=e
+            if name not in used: raise err
+
+          css='''\n/* Vehicle showcase · Summer 2026 */\n.tripPulse{margin:18px 0 20px;border:1px solid var(--line);border-radius:22px;background:var(--paper);padding:18px 22px;text-align:center;font-size:clamp(15px,2vw,20px);font-weight:950;letter-spacing:.01em}.vehicleSection{margin:0 0 22px;background:linear-gradient(180deg,#fffdf8,#f8f1e7);border:1px solid var(--line);border-radius:28px;padding:clamp(22px,4vw,34px);overflow:hidden}.vehicleHead{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:20px}.vehicleHead .overline{font-size:10px;font-weight:950;letter-spacing:.16em;color:var(--gold);direction:ltr}.vehicleHead h2{font-size:clamp(30px,4vw,44px);margin:6px 0 0}.vehicleHead p{margin:0;max-width:460px;color:var(--muted);font-size:13px;line-height:1.7}.vehicleGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.vehicleCard{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 12px 30px rgba(58,45,28,.06)}.vehicleMedia{height:230px;background:#ece7df;overflow:hidden}.vehicleMedia img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s ease}.vehicleCard:hover .vehicleMedia img{transform:scale(1.035)}.vehicleBody{padding:18px 19px 20px}.vehicleNo{font-size:10px;font-weight:950;letter-spacing:.12em;color:var(--gold);direction:ltr}.vehicleBody h3{margin:6px 0 6px;font-size:23px;line-height:1.1}.vehiclePlace{font-size:12px;font-weight:900;color:var(--accent);margin-bottom:10px}.vehicleBody p{font-size:13px;line-height:1.72;color:#555048;margin:0}.vehicleCredit{font-size:9px;color:#958d82;margin-top:10px;direction:ltr;text-align:left}.hawaiiVehicleSection{width:min(1120px,calc(100% - 30px));margin:0 auto 28px}.hawaiiVehicleSection .vehicleSection{margin:0}@media(max-width:760px){.vehicleHead{display:block}.vehicleHead p{margin-top:10px}.vehicleGrid{grid-template-columns:1fr}.vehicleMedia{height:210px}.tripPulse{font-size:15px;padding:15px}}\n'''
+
+          summer_cards='''<div class="tripPulse reveal">6 טיסות · 4 רכבים · אלפי קילומטרים · מסע אחד</div><section class="vehicleSection reveal" aria-label="הרכבים שלנו"><div class="vehicleHead"><div><div class="overline">THE CARS THAT CARRIED US THROUGH SUMMER 2026</div><h2>על ארבעה גלגלים</h2></div><p>בין הטיסות היו הכבישים. ארבעה רכבים ליוו אותנו בארבעה פרקים שונים של המסע.</p></div><div class="vehicleGrid"><article class="vehicleCard"><div class="vehicleMedia"><img src="/assets/summer-2026/vehicles/suburban.jpg?v=20260815cars1" alt="Chevrolet Suburban" loading="lazy"></div><div class="vehicleBody"><div class="vehicleNo">01 · ROAD TRIP</div><h3>Chevrolet Suburban</h3><div class="vehiclePlace">Seattle + Canadian Rockies</div><p>הרכב הגדול שליווה אותנו בפרק הארוך של סיאטל, קנדה והרוקיז, עם מקום למשפחה, למזוודות ולכל מה שצריך לדרך.</p><div class="vehicleCredit">Official Chevrolet media image</div></div></article><article class="vehicleCard"><div class="vehicleMedia"><img src="/assets/summer-2026/vehicles/pathfinder.jpg?v=20260815cars1" alt="Nissan Pathfinder" loading="lazy"></div><div class="vehicleBody"><div class="vehicleNo">02 · BIG ISLAND</div><h3>Nissan Pathfinder</h3><div class="vehiclePlace">Big Island · Dollar</div><p>הרכב שלנו בביג איילנד, מהנסיעות סביב קונה ועד הדרך לפארק הרי הגעש ולצפון האי.</p><div class="vehicleCredit">Official Nissan media image</div></div></article><article class="vehicleCard"><div class="vehicleMedia"><img src="/assets/summer-2026/vehicles/tahoe.jpg?v=20260815cars1" alt="Chevrolet Tahoe" loading="lazy"></div><div class="vehicleBody"><div class="vehicleNo">03 · MAUI</div><h3>Chevrolet Tahoe</h3><div class="vehiclePlace">Maui · Avis</div><p>הרכב שליווה אותנו במאווי והיה הבית שלנו על הכביש גם ביום הארוך של Road to Hana.</p><div class="vehicleCredit">Official Chevrolet media image</div></div></article><article class="vehicleCard"><div class="vehicleMedia"><img src="/assets/summer-2026/vehicles/traverse.jpg?v=20260815cars1" alt="Chevrolet Traverse" loading="lazy"></div><div class="vehicleBody"><div class="vehicleNo">04 · FINAL CHAPTER</div><h3>Chevrolet Traverse</h3><div class="vehiclePlace">Los Angeles</div><p>הרכב של הפרק האחרון במסע, לוס אנג׳לס והנסיעות סביב העיר בימים האחרונים לפני החזרה הביתה.</p><div class="vehicleCredit">Official Chevrolet media image</div></div></article></div></section>'''
+
+          hawaii_cards='''<section class="hawaiiVehicleSection"><div class="vehicleSection"><div class="vehicleHead"><div><div class="overline">TWO ISLANDS · TWO CARS</div><h2>על ארבעה גלגלים בהוואי</h2></div><p>שני איים, שני רכבים שונים, והרבה מאוד כביש בין חוף, הר געש, מפלים ויער טרופי.</p></div><div class="vehicleGrid"><article class="vehicleCard"><div class="vehicleMedia"><img src="/assets/summer-2026/vehicles/pathfinder.jpg?v=20260815cars1" alt="Nissan Pathfinder" loading="lazy"></div><div class="vehicleBody"><div class="vehicleNo">BIG ISLAND</div><h3>Nissan Pathfinder</h3><div class="vehiclePlace">Dollar</div><p>הרכב של ביג איילנד, מרווח ונוח לנסיעות הארוכות בין קונה, הצפון והרי הגעש.</p><div class="vehicleCredit">Official Nissan media image</div></div></article><article class="vehicleCard"><div class="vehicleMedia"><img src="/assets/summer-2026/vehicles/tahoe.jpg?v=20260815cars1" alt="Chevrolet Tahoe" loading="lazy"></div><div class="vehicleBody"><div class="vehicleNo">MAUI</div><h3>Chevrolet Tahoe</h3><div class="vehiclePlace">Avis</div><p>הרכב של מאווי, כולל היום הארוך והמפותל של Road to Hana.</p><div class="vehicleCredit">Official Chevrolet media image</div></div></article></div></div></section>'''
+
+          def patch(path,kind):
+            s=path.read_text(encoding='utf-8')
+            if '/* Vehicle showcase · Summer 2026 */' not in s:
+              s=s.replace('</style>',css+'</style>',1)
+            # remove previous showcase if rerun
+            s=re.sub(r'<div class="tripPulse reveal">6 טיסות.*?</section>','',s,flags=re.S)
+            s=re.sub(r'<section class="hawaiiVehicleSection">.*?</section>','',s,flags=re.S)
+            if kind=='summer':
+              marker='<nav class="tools">'
+              if marker not in s: raise RuntimeError('summer insertion marker missing')
+              s=s.replace(marker,summer_cards+'\n'+marker,1)
+            else:
+              marker='<nav class="days"'
+              if marker not in s: raise RuntimeError('hawaii insertion marker missing')
+              s=s.replace(marker,hawaii_cards+'\n'+marker,1)
+            path.write_text(s,encoding='utf-8')
+
+          patch(root/'trips'/'summer-2026'/'index.html','summer')
+          patch(root/'trips'/'hawaii-2026'/'index.html','hawaii')
+          print('Downloaded:',used)
+          PY
+      - name: Commit vehicle showcase
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/summer-2026/vehicles trips/summer-2026/index.html trips/hawaii-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Add magazine vehicle showcase'
+          git push
