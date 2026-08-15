@@ -1,0 +1,43 @@
+name: Clean vehicle showcase duplicates
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/cleanup-vehicle-showcase.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove duplicated text-only vehicle summaries
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          summer = Path('trips/summer-2026/index.html')
+          s = summer.read_text(encoding='utf-8')
+          s, n = re.subn(r'<article class="infoCard">\s*<div class="icon">.*?</div>\s*<strong>הרכבים שלנו</strong>.*?</article>', '', s, count=1, flags=re.S)
+          print('Summer duplicate cards removed:', n)
+          summer.write_text(s, encoding='utf-8')
+
+          hawaii = Path('trips/hawaii-2026/index.html')
+          s = hawaii.read_text(encoding='utf-8')
+          s, n1 = re.subn(r'<div><b>ביג איילנד:</b>\s*Dollar,\s*Nissan Pathfinder</div>', '', s, count=1)
+          s, n2 = re.subn(r'<div><b>מאווי:</b>\s*Avis,\s*Chevrolet Tahoe</div>', '', s, count=1)
+          print('Hawaii snapshot vehicle lines removed:', n1 + n2)
+          hawaii.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trips/summer-2026/index.html trips/hawaii-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Remove duplicate vehicle summary cards'
+          git push
