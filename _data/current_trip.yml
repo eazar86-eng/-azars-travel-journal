@@ -4,9 +4,9 @@ current_island: "לוס אנג׳לס"
 current_day: "15.08"
 current_day_anchor: "day-1508"
 current_day_title: "משנים תוכניות ונוסעים ליוניברסל"
-current_summary: "ב־15 באוגוסט שינינו את התוכנית ברגע האחרון ובמקום Palm Springs חזרנו ליוניברסל. נכנסנו רק בצהריים, השתמשנו ב־Express, עברנו בין הארי פוטר, Springfield, המיניונים, Studio Tour, ה־Lower Lot ו־SUPER NINTENDO WORLD, וסיגל ואריאל הכריזו ש־Fast & Furious: Hollywood Drift הוא המתקן הכי כיף שעשו עד היום."
+current_summary: "ב־15 באוגוסט שינינו את התוכנית ברגע האחרון ובמקום Palm Springs חזרנו ליוניברסל. נכנסנו רק בצהריים, השתמשנו ב־Express, עברנו בין הארי פוטר, Springfield, המיניונים, Studio Tour, ה־Lower Lot ו־SUPER NINTENDO WORLD, וסיגל ואריאל הכריזו ש־Fast & Furious: Hollywood Drift הוא המתקן הכי כיף שעשו עד היום. את הערב סיימנו בסיבוב ב־Universal CityWalk, בחנויות ומשם חזרנו למלון."
 current_page: "/trips/summer-2026/#day-1508"
-version: "20260815universal3"
+version: "20260815universal4"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
