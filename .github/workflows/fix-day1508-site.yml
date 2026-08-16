@@ -1,0 +1,89 @@
+name: Fix August 15 site
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-day1508-site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fix 15 August content, cache version and home state
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          day = root / 'content' / 'day-1508.md'
+          s = day.read_text(encoding='utf-8')
+
+          photo_block = '''![רגעים מהכניסה ליוניברסל](/assets/summer-2026/day-1508/IMG_0335.jpeg)\n\n![מתחילים את היום ביוניברסל](/assets/summer-2026/day-1508/IMG_0336.jpeg)\n\n![לפני שמתחילים את רצף המתקנים](/assets/summer-2026/day-1508/IMG_0337.jpeg)\n\n'''
+          if '/assets/summer-2026/day-1508/IMG_0335.jpeg' not in s:
+              marker = '## מתחילים בהוגוורטס'
+              if marker not in s:
+                  raise RuntimeError('Could not find rides section marker')
+              s = s.replace(marker, photo_block + marker, 1)
+          day.write_text(s, encoding='utf-8')
+
+          data = root / '_data' / 'current_trip.yml'
+          y = data.read_text(encoding='utf-8')
+          y = re.sub(r'^version: ".*?"$', 'version: "20260815universal3"', y, flags=re.M)
+          data.write_text(y, encoding='utf-8')
+
+          # Rebuild summer trip page and current-summary references using the site's own synchronizer.
+          import subprocess
+          subprocess.run(['python', 'scripts/sync_current_trip.py'], check=True)
+
+          # Fix stale current destination and stale Hawaii feature/meta on home page.
+          home = root / 'index.html'
+          h = home.read_text(encoding='utf-8')
+          h = h.replace('מסע קיץ 2026 ממשיך עכשיו במאווי, אחרי ניו יורק, סיאטל, הרוקייז, גליישר והביג איילנד.',
+                        'מסע קיץ 2026 ממשיך עכשיו בלוס אנג׳לס, אחרי ניו יורק, סיאטל, הרוקייז, גליישר והוואי.')
+          h = h.replace('Azar’s Travel | עכשיו במאווי', 'Azar’s Travel | עכשיו בלוס אנג׳לס')
+          h = h.replace('https://azarstravel.com/assets/home/green-wall.jpg?v=20260811maui2',
+                        'https://azarstravel.com/assets/summer-2026/day-1508/IMG_0335.jpeg?v=20260815universal3')
+          h = h.replace('<img src="/assets/hawaii/kona-b/04.jpg?v=20260811maui2" alt="הוואי">',
+                        '<img src="/assets/summer-2026/day-1508/IMG_0335.jpeg?v=20260815universal3" alt="Universal Studios Hollywood">')
+          h = h.replace('<a class="current" href="/trips/summer-2026/#maui">מאווי</a>',
+                        '<a href="/trips/summer-2026/#maui">מאווי</a>')
+          h = h.replace('<a href="/trips/summer-2026/#los-angeles">לוס אנג׳לס</a>',
+                        '<a class="current" href="/trips/summer-2026/#los-angeles">לוס אנג׳לס</a>')
+          home.write_text(h, encoding='utf-8')
+
+          # Hard checks: do not commit a half-fixed state.
+          checks = {
+              'three new photos': all(x in day.read_text(encoding='utf-8') for x in ['IMG_0335.jpeg','IMG_0336.jpeg','IMG_0337.jpeg']),
+              'summer day anchor': 'day-1508' in (root/'trips'/'summer-2026'/'index.html').read_text(encoding='utf-8'),
+              'summer fetch': 'day-1508.md?v=20260815universal3' in (root/'trips'/'summer-2026'/'index.html').read_text(encoding='utf-8'),
+              'home LA current': 'class="current" href="/trips/summer-2026/#los-angeles"' in home.read_text(encoding='utf-8'),
+              'home Maui not current': 'class="current" href="/trips/summer-2026/#maui"' not in home.read_text(encoding='utf-8'),
+              'home current day link': '/trips/summer-2026/#day-1508' in home.read_text(encoding='utf-8'),
+          }
+          failed = [k for k,v in checks.items() if not v]
+          if failed:
+              raise RuntimeError('Validation failed: ' + ', '.join(failed))
+          print('All validation checks passed')
+          PY
+      - name: Commit fixes
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/day-1508.md _data/current_trip.yml index.html trips/summer-2026/index.html
+          git commit -m "Fix August 15 photos and current trip pages"
+          git push
