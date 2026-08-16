@@ -1,12 +1,12 @@
 trip_name: "מסע קיץ 2026"
 current_region: "לוס אנג׳לס"
 current_island: "לוס אנג׳לס"
-current_day: "14.08"
-current_day_anchor: "day-1408"
-current_day_title: "נוחתים בלוס אנג׳לס"
-current_summary: "ב 14 באוגוסט נחתנו בלוס אנג׳לס, חזרנו ל Marriott LAX שזכור לנו לטובה, השלמנו כמה שעות שינה, אספנו את ה Chevrolet Traverse שלנו ויצאנו דרך הפקקים של העיר ל Costa Mesa ולארוחת ערב אהובה ב Maggiano’s, אפילו באותו שולחן שבו ישבנו לפני שנתיים."
-current_page: "/trips/summer-2026/#day-1408"
-version: "20260814losangeles1"
+current_day: "15.08"
+current_day_anchor: "day-1508"
+current_day_title: "משנים תוכניות ונוסעים ליוניברסל"
+current_summary: "ב־15 באוגוסט שינינו את התוכנית ברגע האחרון ובמקום Palm Springs חזרנו ליוניברסל. נכנסנו רק בצהריים, השתמשנו ב־Express, עברנו בין הארי פוטר, Springfield, המיניונים, Studio Tour, ה־Lower Lot ו־SUPER NINTENDO WORLD, וסיגל ואריאל הכריזו ש־Fast & Furious: Hollywood Drift הוא המתקן הכי כיף שעשו עד היום."
+current_page: "/trips/summer-2026/#day-1508"
+version: "20260815universal1"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
