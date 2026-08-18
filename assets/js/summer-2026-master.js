@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '20260818qa9';
+  const VERSION = '20260818cars10';
   const $ = (s, r = document) => r.querySelector(s);
 
   function addStyles() {
@@ -71,10 +71,10 @@
       ['elal','Los Angeles','Tel Aviv','הדרך הביתה']
     ];
     const cars=[
-      {photo:'/assets/transport/cars/suburban.jpg',fallback:'/assets/transport/cars/suburban.svg',name:'Chevrolet Suburban',place:'Seattle + Canadian Rockies',note:'הרכב הגדול של פרק הכבישים הארוך דרך קנדה והרוקייז.'},
-      {photo:'/assets/transport/cars/pathfinder.jpg',fallback:'/assets/transport/cars/pathfinder.svg',name:'Nissan Pathfinder',place:'Big Island',note:'הרכב של ביג איילנד, מקונה ועד הנסיעות הארוכות ברחבי האי.'},
-      {photo:'/assets/transport/cars/tahoe.jpg',fallback:'/assets/transport/cars/tahoe.svg',name:'Chevrolet Tahoe',place:'Maui',note:'הרכב של מאווי, כולל Road to Hana והנסיעות ברחבי האי.'},
-      {photo:'/assets/transport/cars/traverse.jpg',fallback:'/assets/transport/cars/traverse.svg',name:'Chevrolet Traverse',place:'Los Angeles',note:'הרכב של הפרק האחרון בלוס אנג׳לס לפני הדרך הביתה.'}
+      {photo:'/assets/transport/cars/suburban.svg',fallback:'/assets/transport/cars/suburban.svg',name:'Chevrolet Suburban',place:'Seattle + Canadian Rockies',note:'הרכב הגדול של פרק הכבישים הארוך דרך קנדה והרוקייז.'},
+      {photo:'/assets/transport/cars/pathfinder.svg',fallback:'/assets/transport/cars/pathfinder.svg',name:'Nissan Pathfinder',place:'Big Island',note:'הרכב של ביג איילנד, מקונה ועד הנסיעות הארוכות ברחבי האי.'},
+      {photo:'/assets/transport/cars/tahoe.svg',fallback:'/assets/transport/cars/tahoe.svg',name:'Chevrolet Tahoe',place:'Maui',note:'הרכב של מאווי, כולל Road to Hana והנסיעות ברחבי האי.'},
+      {photo:'/assets/transport/cars/traverse.svg',fallback:'/assets/transport/cars/traverse.svg',name:'Chevrolet Traverse',place:'Los Angeles',note:'הרכב של הפרק האחרון בלוס אנג׳לס לפני הדרך הביתה.'}
     ];
     const section=document.createElement('section');
     section.className='transportMaster';
