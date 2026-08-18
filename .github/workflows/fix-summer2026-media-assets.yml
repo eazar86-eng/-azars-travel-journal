@@ -1,0 +1,136 @@
+name: Fix Summer 2026 media and transport assets
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-summer2026-media-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install local car images
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/transport/cars assets/transport/airlines
+          curl -fL --retry 3 --retry-delay 2 'https://upload.wikimedia.org/wikipedia/commons/7/77/Suburban.jpg' -o assets/transport/cars/suburban.jpg
+          curl -fL --retry 3 --retry-delay 2 'https://upload.wikimedia.org/wikipedia/commons/1/1a/%2722_Nissan_Pathfinder.jpg' -o assets/transport/cars/pathfinder.jpg
+          curl -fL --retry 3 --retry-delay 2 'https://upload.wikimedia.org/wikipedia/commons/7/7d/%2721_Chevrolet_Tahoe.jpg' -o assets/transport/cars/tahoe.jpg
+          curl -fL --retry 3 --retry-delay 2 'https://upload.wikimedia.org/wikipedia/commons/a/a4/24_Chevrolet_Traverse_Z71.jpg' -o assets/transport/cars/traverse.jpg
+          for f in assets/transport/cars/*.jpg; do
+            test -s "$f"
+            bytes=$(wc -c < "$f")
+            test "$bytes" -gt 10000
+          done
+
+      - name: Create local airline marks
+        shell: bash
+        run: |
+          cat > assets/transport/airlines/elal.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="240" height="72" viewBox="0 0 240 72" role="img" aria-label="EL AL"><rect width="240" height="72" rx="14" fill="#fff"/><g fill="none" stroke="#15539a" stroke-width="3"><path d="M29 18l17 30M46 18L29 48M24 27h27M24 39h27"/></g><text x="64" y="46" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#15539a">EL AL</text></svg>
+          SVG
+          cat > assets/transport/airlines/united.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="240" height="72" viewBox="0 0 240 72" role="img" aria-label="United"><rect width="240" height="72" rx="14" fill="#fff"/><g transform="translate(19 15)" fill="none" stroke="#0b4ea2" stroke-width="2"><circle cx="21" cy="21" r="20"/><path d="M2 21h38M21 1v40M7 8c8 7 20 7 28 0M7 34c8-7 20-7 28 0M12 3c-5 11-5 25 0 36M30 3c5 11 5 25 0 36"/></g><text x="64" y="46" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#0b4ea2">UNITED</text></svg>
+          SVG
+          cat > assets/transport/airlines/delta.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="240" height="72" viewBox="0 0 240 72" role="img" aria-label="Delta"><rect width="240" height="72" rx="14" fill="#fff"/><path d="M20 50L42 15l22 35H20z" fill="#c62036"/><path d="M42 29l13 21H29l13-21z" fill="#8b1730"/><text x="76" y="46" font-family="Arial,sans-serif" font-size="29" font-weight="700" fill="#1b2b4b">DELTA</text></svg>
+          SVG
+          cat > assets/transport/airlines/hawaiian.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="260" height="72" viewBox="0 0 260 72" role="img" aria-label="Hawaiian Airlines"><rect width="260" height="72" rx="14" fill="#fff"/><circle cx="39" cy="36" r="24" fill="#6f348f"/><path d="M29 45c4-14 12-22 26-24-3 6-4 13-1 20-7-4-13-3-25 4z" fill="#fff"/><circle cx="50" cy="22" r="5" fill="#e8a4c8"/><text x="73" y="43" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#563071">HAWAIIAN</text></svg>
+          SVG
+
+      - name: Patch media layout and transport sources
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('assets/js/summer-2026-master.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("const VERSION = '20260818editorial3';", "const VERSION = '20260818mediafix5';")
+
+          old_air="const airlines={elal:['https://www.elal.com/favicon.ico','EL AL'],united:['https://www.united.com/favicon.ico','United'],delta:['https://www.delta.com/favicon.ico','Delta'],hawaiian:['https://www.hawaiianairlines.com/favicon.ico','Hawaiian Airlines']};"
+          new_air="const airlines={elal:['/assets/transport/airlines/elal.svg','EL AL'],united:['/assets/transport/airlines/united.svg','United'],delta:['/assets/transport/airlines/delta.svg','Delta'],hawaiian:['/assets/transport/airlines/hawaiian.svg','Hawaiian Airlines']};"
+          if old_air not in s:
+              raise SystemExit('Airline source marker not found')
+          s=s.replace(old_air,new_air,1)
+
+          old_cars="const cars=[['https://upload.wikimedia.org/wikipedia/commons/7/77/Suburban.jpg','Chevrolet Suburban','Seattle + Canadian Rockies'],['https://upload.wikimedia.org/wikipedia/commons/1/1a/%2722_Nissan_Pathfinder.jpg','Nissan Pathfinder','Big Island'],['https://upload.wikimedia.org/wikipedia/commons/7/7d/%2721_Chevrolet_Tahoe.jpg','Chevrolet Tahoe','Maui'],['https://upload.wikimedia.org/wikipedia/commons/a/a4/24_Chevrolet_Traverse_Z71.jpg','Chevrolet Traverse','Los Angeles']];"
+          new_cars="const cars=[['/assets/transport/cars/suburban.jpg','Chevrolet Suburban','Seattle + Canadian Rockies'],['/assets/transport/cars/pathfinder.jpg','Nissan Pathfinder','Big Island'],['/assets/transport/cars/tahoe.jpg','Chevrolet Tahoe','Maui'],['/assets/transport/cars/traverse.jpg','Chevrolet Traverse','Los Angeles']];"
+          if old_cars not in s:
+              raise SystemExit('Car source marker not found')
+          s=s.replace(old_cars,new_cars,1)
+          s=s.replace(' loading="lazy" referrerpolicy="no-referrer"', ' loading="lazy"', 1)
+
+          start=s.index('  function distributeMedia(article,media)')
+          end=s.index('  function renderSingleDay', start)
+          new_dist=r'''  function distributeMedia(article,media){
+    if(!media.length)return;
+    const candidates=[...article.querySelectorAll(':scope > p,:scope > h2,:scope > h3')];
+    if(!candidates.length){
+      const title=article.querySelector('.dayTitle');
+      const box=document.createElement('div');box.className='dayGallery';media.forEach(x=>box.appendChild(x));
+      (title||article.firstElementChild).insertAdjacentElement('afterend',box);return;
+    }
+    const usable=candidates.length>2?candidates.slice(0,-1):candidates;
+    const slotCount=Math.max(1,Math.min(media.length,usable.length));
+    const groups=[];
+    for(let i=0;i<slotCount;i++){
+      const from=Math.floor(i*media.length/slotCount),to=Math.floor((i+1)*media.length/slotCount);
+      groups.push(media.slice(from,to));
+    }
+    const used=new Set();
+    groups.forEach((g,i)=>{
+      let idx=Math.round(((i+1)/(groups.length+1))*(usable.length-1));
+      while(used.has(idx)&&idx<usable.length-1)idx++;
+      while(used.has(idx)&&idx>0)idx--;
+      used.add(idx);
+      let node;
+      if(g.length===1){node=g[0];node.classList.add('storyPhoto')}
+      else{node=document.createElement('div');node.className='dayGallery';g.forEach(x=>node.appendChild(x))}
+      usable[idx].insertAdjacentElement('afterend',node);
+    });
+  }
+
+'''
+          s=s[:start]+new_dist+s[end:]
+
+          # Make airline marks larger and deterministic, and make local vehicle images resilient.
+          s=s.replace('.airBrand img{width:36px;height:36px;object-fit:contain;border-radius:8px;background:#fff}', '.airBrand img{width:92px;height:34px;object-fit:contain;border-radius:7px;background:#fff;flex:0 0 auto}')
+          s=s.replace('.carMasterMedia img{width:100%;height:100%;object-fit:cover}', '.carMasterMedia img{width:100%;height:100%;object-fit:cover;display:block}')
+          s=s.replace('.dayGallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:30px 0 34px}', '.dayGallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:32px 0 36px}.dayGallery:has(> .photo:nth-child(3)){grid-template-columns:repeat(2,minmax(0,1fr))}.dayGallery .photo:nth-child(3):last-child{grid-column:1/-1}')
+          p.write_text(s,encoding='utf-8')
+
+          h=Path('trips/summer-2026/index.html')
+          x=h.read_text(encoding='utf-8')
+          x=x.replace('/assets/js/summer-2026-master.js?v=20260818qa1','/assets/js/summer-2026-master.js?v=20260818mediafix5')
+          h.write_text(x,encoding='utf-8')
+          PY
+
+      - name: QA JavaScript and assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check assets/js/summer-2026-master.js
+          grep -q '/assets/transport/airlines/elal.svg' assets/js/summer-2026-master.js
+          grep -q '/assets/transport/cars/pathfinder.jpg' assets/js/summer-2026-master.js
+          ! grep -q 'www.elal.com/favicon.ico' assets/js/summer-2026-master.js
+          ! grep -q 'upload.wikimedia.org' assets/js/summer-2026-master.js
+          grep -q '20260818mediafix5' trips/summer-2026/index.html
+          for f in assets/transport/airlines/*.svg assets/transport/cars/*.jpg; do test -s "$f"; done
+
+      - name: Commit fixes
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/js/summer-2026-master.js trips/summer-2026/index.html assets/transport
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix Summer 2026 photo flow and local transport media'
+          git push
