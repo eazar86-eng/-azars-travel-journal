@@ -1,0 +1,93 @@
+name: QA polish Summer 2026
+
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-polish-summer2026.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  qa-polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove internal markers and harden renderers
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          js = Path('assets/js/summer-2026-master.js')
+          s = js.read_text(encoding='utf-8')
+          s = s.replace("const VERSION = '20260818mediafix6';", "const VERSION = '20260818qa7';")
+
+          # Never render HTML comments, build markers, TODOs or internal photo delimiters.
+          s = s.replace("const line=raw.trim();if(!line)continue;", "const line=raw.trim();if(!line||/^<!--[\\s\\S]*-->$/.test(line)||/^\\s*(?:TODO|DEBUG|PLACEHOLDER)\\b/i.test(line))continue;", 1)
+          s = s.replace("const line=raw.trim();if(!line||/^\\|/.test(line))continue;", "const line=raw.trim();if(!line||/^\\|/.test(line)||/^<!--[\\s\\S]*-->$/.test(line)||/^\\s*(?:TODO|DEBUG|PLACEHOLDER)\\b/i.test(line))continue;", 1)
+          js.write_text(s, encoding='utf-8')
+
+          # Clean internal editorial markers from the source content itself.
+          content = Path('content/summer-2026.md')
+          c = content.read_text(encoding='utf-8')
+          c = re.sub(r'^\s*<!--\s*[A-Z0-9_ -]*(?:PHOTOS?|GALLERY|MEDIA)[A-Z0-9_ -]*(?:START|END)\s*-->\s*\n?', '', c, flags=re.M|re.I)
+          c = re.sub(r'^\s*<!--\s*(?:START|END)[A-Z0-9_ -]*\s*-->\s*\n?', '', c, flags=re.M|re.I)
+          c = c.replace(
+              "את טיסות הפנים חילקנו בין מספר חברות. מניו יורק לסיאטל טסנו עם יונייטד, מסיאטל להוואי עם דלתא, ומביג איילנד ללוס אנג'לס שוב עם יונייטד.",
+              "את טיסות הפנים חילקנו בין מספר חברות. מניו יורק לסיאטל טסנו עם יונייטד, מסיאטל לביג איילנד עם דלתא, מביג איילנד למאווי עם Hawaiian Airlines, וממאווי ללוס אנג'לס שוב עם יונייטד."
+          )
+          content.write_text(c, encoding='utf-8')
+
+          # Harden the original inline fallback renderer as well.
+          page = Path('trips/summer-2026/index.html')
+          h = page.read_text(encoding='utf-8')
+          h = h.replace("const line=raw.trim();if(!line||/^\\|[- :|]+$/.test(line)||/^\\|/.test(line))continue;", "const line=raw.trim();if(!line||/^\\|[- :|]+$/.test(line)||/^\\|/.test(line)||/^<!--[\\s\\S]*-->$/.test(line))continue;")
+          h = h.replace('שלוש חברות תעופה וארבעה רכבים שונים', 'ארבע חברות תעופה וארבעה רכבים שונים')
+          h = h.replace('שלוש חברות תעופה.<br>מסע אחד.', 'ארבע חברות תעופה.<br>מסע אחד.')
+          h = h.replace('את המסע פתחנו עם אל על לניו יורק, המשכנו בטיסות פנים עם United ו Delta, ואת הדרך חזרה אנחנו מתחילים מלוס אנג׳לס. החברות עצמן הן חלק מהסיפור של הדרך.', 'את המסע פתחנו עם EL AL לניו יורק, המשכנו ל־Seattle עם United, לביג איילנד עם Delta, בין האיים עם Hawaiian Airlines, ממאווי ללוס אנג׳לס עם United, ואת הדרך הביתה עם EL AL.')
+          h = h.replace('/assets/js/summer-2026-master.js?v=20260818qa1', '/assets/js/summer-2026-master.js?v=20260818qa7')
+          page.write_text(h, encoding='utf-8')
+          PY
+
+      - name: Professional QA checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check assets/js/summer-2026-master.js
+
+          # No editorial/debug markers may leak into user-visible content.
+          ! grep -Eini 'photos[ _-]*(start|end)|gallery[ _-]*(start|end)|media[ _-]*(start|end)|placeholder|debug' content/summer-2026.md
+          ! grep -Eini '<!--[^>]*(START|END)[^>]*-->' content/summer-2026.md
+
+          # Flight data must include all four airlines and the island hop.
+          grep -q 'Hawaiian Airlines' assets/js/summer-2026-master.js
+          grep -q "'Big Island','Maui'" assets/js/summer-2026-master.js
+          grep -q "'Maui','Los Angeles'" assets/js/summer-2026-master.js
+          grep -q 'ארבע חברות תעופה' trips/summer-2026/index.html
+
+          # Four vehicle cards and four stable fallbacks must exist.
+          grep -q 'Chevrolet Suburban' assets/js/summer-2026-master.js
+          grep -q 'Nissan Pathfinder' assets/js/summer-2026-master.js
+          grep -q 'Chevrolet Tahoe' assets/js/summer-2026-master.js
+          grep -q 'Chevrolet Traverse' assets/js/summer-2026-master.js
+          for f in suburban pathfinder tahoe traverse; do test -s "assets/transport/cars/$f.svg"; done
+          for f in elal united delta hawaiian; do test -s "assets/transport/airlines/$f.svg"; done
+
+          # Required page anchors/sections.
+          grep -q 'id="journal"' trips/summer-2026/index.html
+          grep -q 'id="route"' trips/summer-2026/index.html
+          grep -q '20260818qa7' trips/summer-2026/index.html
+
+      - name: Commit QA fixes
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/js/summer-2026-master.js content/summer-2026.md trips/summer-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'QA polish Summer 2026 content and rendering'
+          git push
