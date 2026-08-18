@@ -1,5 +1,6 @@
 name: QA polish Summer 2026
 
+# triggered QA pass 2026-08-18
 on:
   push:
     paths:
@@ -58,26 +59,18 @@ jobs:
         run: |
           set -euo pipefail
           node --check assets/js/summer-2026-master.js
-
-          # No editorial/debug markers may leak into user-visible content.
           ! grep -Eini 'photos[ _-]*(start|end)|gallery[ _-]*(start|end)|media[ _-]*(start|end)|placeholder|debug' content/summer-2026.md
           ! grep -Eini '<!--[^>]*(START|END)[^>]*-->' content/summer-2026.md
-
-          # Flight data must include all four airlines and the island hop.
           grep -q 'Hawaiian Airlines' assets/js/summer-2026-master.js
           grep -q "'Big Island','Maui'" assets/js/summer-2026-master.js
           grep -q "'Maui','Los Angeles'" assets/js/summer-2026-master.js
           grep -q 'ארבע חברות תעופה' trips/summer-2026/index.html
-
-          # Four vehicle cards and four stable fallbacks must exist.
           grep -q 'Chevrolet Suburban' assets/js/summer-2026-master.js
           grep -q 'Nissan Pathfinder' assets/js/summer-2026-master.js
           grep -q 'Chevrolet Tahoe' assets/js/summer-2026-master.js
           grep -q 'Chevrolet Traverse' assets/js/summer-2026-master.js
           for f in suburban pathfinder tahoe traverse; do test -s "assets/transport/cars/$f.svg"; done
           for f in elal united delta hawaiian; do test -s "assets/transport/airlines/$f.svg"; done
-
-          # Required page anchors/sections.
           grep -q 'id="journal"' trips/summer-2026/index.html
           grep -q 'id="route"' trips/summer-2026/index.html
           grep -q '20260818qa7' trips/summer-2026/index.html
