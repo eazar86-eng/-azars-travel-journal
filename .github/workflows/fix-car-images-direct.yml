@@ -1,5 +1,6 @@
 name: Fix car images direct
 
+# trigger 2026-08-18
 on:
   push:
     paths:
