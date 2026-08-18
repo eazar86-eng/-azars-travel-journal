@@ -1,3 +1,4 @@
+# trigger: 2026-08-18 media repair
 name: Fix Summer 2026 media and transport assets
 
 on:
@@ -100,8 +101,6 @@ jobs:
 
 '''
           s=s[:start]+new_dist+s[end:]
-
-          # Make airline marks larger and deterministic, and make local vehicle images resilient.
           s=s.replace('.airBrand img{width:36px;height:36px;object-fit:contain;border-radius:8px;background:#fff}', '.airBrand img{width:92px;height:34px;object-fit:contain;border-radius:7px;background:#fff;flex:0 0 auto}')
           s=s.replace('.carMasterMedia img{width:100%;height:100%;object-fit:cover}', '.carMasterMedia img{width:100%;height:100%;object-fit:cover;display:block}')
           s=s.replace('.dayGallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:30px 0 34px}', '.dayGallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:32px 0 36px}.dayGallery:has(> .photo:nth-child(3)){grid-template-columns:repeat(2,minmax(0,1fr))}.dayGallery .photo:nth-child(3):last-child{grid-column:1/-1}')
