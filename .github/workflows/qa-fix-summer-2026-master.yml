@@ -1,0 +1,42 @@
+name: QA fix Summer 2026 master
+
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-fix-summer-2026-master.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  qa-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix anchors and day heading parsing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('assets/js/summer-2026-master.js')
+          s=p.read_text(encoding='utf-8')
+          marker="  function renderSingleDay(md){\n"
+          helper="""  function anchorFor(t){\n    const x=t.replace(/\\s+/g,' ').trim();\n    let m=x.match(/(?:^|\\D)(\\d{1,2})[\\/.](\\d{1,2})(?:\\D|$)/);\n    if(m)return `day-${String(m[1]).padStart(2,'0')}${String(m[2]).padStart(2,'0')}`;\n    if(/18 ביולי/.test(x))return 'day-1807';\n    if(/19 ביולי/.test(x))return 'day-1907';\n    if(/22 ביולי|סיאטל/.test(x))return 'seattle';\n    if(/23 ביולי|רוקייז/.test(x))return 'rockies';\n    if(/30 ביולי|גליישר/.test(x))return 'glacier';\n    if(/4 באוגוסט/.test(x))return 'hawaii';\n    return '';\n  }\n\n  function parseDayHeading(heading){\n    const pipe=heading.split('|').map(x=>x.trim());\n    if(pipe.length>1)return {date:pipe[0],title:pipe.slice(1).join(' | ')};\n    const m=heading.match(/^(\\d{1,2}[\\/.]\\d{1,2})\\s+(.*)$/);\n    return m?{date:m[1],title:m[2]}:{date:heading,title:heading};\n  }\n\n"""
+          if 'function anchorFor(t)' not in s:
+              s=s.replace(marker,helper+marker,1)
+          old="""    const heading=lines[first].trim().replace(/^#\\s+/,''); const parts=heading.split('|').map(x=>x.trim());\n    const art=document.createElement('article');art.className='dayMaster';\n    const d=document.createElement('div');d.className='dateHead';d.textContent=parts[0];art.appendChild(d);\n    const h=document.createElement('h1');h.className='dayTitle';h.textContent=parts.slice(1).join(' | ')||parts[0];art.appendChild(h);\n"""
+          new="""    const heading=lines[first].trim().replace(/^#\\s+/,''); const parsed=parseDayHeading(heading);\n    const art=document.createElement('article');art.className='dayMaster';const aid=anchorFor(parsed.date);if(aid)art.id=aid;\n    const d=document.createElement('div');d.className='dateHead';d.textContent=parsed.date;art.appendChild(d);\n    const h=document.createElement('h1');h.className='dayTitle';h.textContent=parsed.title;art.appendChild(h);\n"""
+          if old in s:s=s.replace(old,new,1)
+          old2="""art=document.createElement('article');art.className='dayMaster';const d=document.createElement('div');d.className='dateHead';d.textContent=clean;art.appendChild(d);root.appendChild(art);expectTitle=true;continue"""
+          new2="""art=document.createElement('article');art.className='dayMaster';const aid=anchorFor(clean);if(aid)art.id=aid;const d=document.createElement('div');d.className='dateHead';d.textContent=clean;art.appendChild(d);root.appendChild(art);expectTitle=true;continue"""
+          if old2 in s:s=s.replace(old2,new2,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit QA fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/js/summer-2026-master.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix Summer 2026 navigation anchors and day headings'
+          git push
