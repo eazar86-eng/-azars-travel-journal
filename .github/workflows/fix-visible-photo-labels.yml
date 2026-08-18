@@ -1,0 +1,57 @@
+name: Fix visible photo labels
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-visible-photo-labels.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove visible photo labels
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          content = Path('content/summer-2026.md')
+          c = content.read_text(encoding='utf-8')
+          c = re.sub(r'!\[[^\]]*\]\((/assets/summer-2026/[^)]+)\)', r'![](\1)', c)
+          content.write_text(c, encoding='utf-8')
+
+          js = Path('assets/js/summer-2026-master.js')
+          s = js.read_text(encoding='utf-8')
+          s = s.replace("const VERSION = '20260818qa7';", "const VERSION = '20260818qa9';")
+          s = s.replace("img.alt=im[1]", "img.alt=''" )
+          s = s.replace("img.onerror=()=>wrap.classList.add('imageError');", "img.onerror=()=>{wrap.remove()};")
+          js.write_text(s, encoding='utf-8')
+
+          page = Path('trips/summer-2026/index.html')
+          h = page.read_text(encoding='utf-8')
+          old = "const im=line.match(/^!\\[([^\\]]*)\\]\\(([^)]+)\\)$/);if(im){if(!current)current=card('יומן המסע');const w=document.createElement('div');w.className='photo';const img=document.createElement('img');img.src=im[2];img.alt=im[1];img.loading='lazy';w.appendChild(img);current.appendChild(w);continue}"
+          new = "const im=line.match(/^!\\[([^\\]]*)\\]\\(([^)]+)\\)$/);if(im){continue}"
+          h = h.replace(old, new)
+          h = re.sub(r'/assets/js/summer-2026-master\.js\?v=[^"\']+', '/assets/js/summer-2026-master.js?v=20260818qa9', h)
+          page.write_text(h, encoding='utf-8')
+          PY
+      - name: QA
+        run: |
+          set -e
+          node --check assets/js/summer-2026-master.js
+          grep -q "const VERSION = '20260818qa9'" assets/js/summer-2026-master.js
+          grep -q '20260818qa9' trips/summer-2026/index.html
+          ! grep -E '!*\[(ניו יורק|רוקייז|גליישר)[[:space:]]+[0-9]+\]' content/summer-2026.md
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content/summer-2026.md assets/js/summer-2026-master.js trips/summer-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Remove visible photo labels from Summer 2026 journal'
+          git push
