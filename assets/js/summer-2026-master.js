@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '20260818qa8';
+  const VERSION = '20260818qa9';
   const $ = (s, r = document) => r.querySelector(s);
 
   function addStyles() {
