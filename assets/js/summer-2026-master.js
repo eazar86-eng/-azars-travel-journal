@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '20260818qa7';
+  const VERSION = '20260818qa8';
   const $ = (s, r = document) => r.querySelector(s);
 
   function addStyles() {
@@ -112,9 +112,9 @@
 
   function makePhoto(im) {
     const wrap=document.createElement('div');wrap.className='photo';
-    const img=document.createElement('img');img.src=im[2]+(im[2].includes('?')?'&':'?')+'v='+VERSION;img.alt=im[1];img.loading='lazy';
+    const img=document.createElement('img');img.src=im[2]+(im[2].includes('?')?'&':'?')+'v='+VERSION;img.alt='';img.loading='lazy';
     img.onload=()=>{if(img.naturalHeight>img.naturalWidth*1.2)wrap.classList.add('portrait')};
-    img.onerror=()=>wrap.classList.add('imageError');
+    img.onerror=()=>{wrap.classList.add('imageError');wrap.remove()};
     wrap.appendChild(img);return wrap;
   }
 

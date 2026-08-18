@@ -53,15 +53,15 @@
 **יום ראשון, 19 ביולי**
 
 **נחיתה בניו יורק וגמר גביע העולם**
-![ניו יורק 1](/assets/summer-2026/nyc-road/01.jpg)
+![](/assets/summer-2026/nyc-road/01.jpg)
 
-![ניו יורק 2](/assets/summer-2026/nyc-road/02.jpg)
+![](/assets/summer-2026/nyc-road/02.jpg)
 
-![ניו יורק 3](/assets/summer-2026/nyc-road/03.jpg)
+![](/assets/summer-2026/nyc-road/03.jpg)
 
-![ניו יורק 4](/assets/summer-2026/nyc-road/04.jpg)
+![](/assets/summer-2026/nyc-road/04.jpg)
 
-![ניו יורק 5](/assets/summer-2026/nyc-road/05.jpg)
+![](/assets/summer-2026/nyc-road/05.jpg)
 נחתנו בניו יורק בשעה 04:30 בבוקר.
 
 זה היה יום מיוחד גם בלי קשר אלינו. באותו יום התקיים גמר גביע העולם בין ארגנטינה לספרד, והעיר כבר התחילה להתמלא באוהדים, תיירים וחולצות כדורגל.
@@ -191,39 +191,39 @@
 אפשר לקרוא על הרוקייז, לראות סרטונים ולתכנן כל עצירה מראש, אבל שום דבר לא באמת מכין לרגע שבו נכנסים אליהם בפעם הראשונה.
 
 **יום חמישי, 23 ביולי**
-![הרוקייז הקנדיים 1](/assets/summer-2026/rockies/01.jpg)
+![](/assets/summer-2026/rockies/01.jpg)
 
-![הרוקייז הקנדיים 2](/assets/summer-2026/rockies/02.jpg)
+![](/assets/summer-2026/rockies/02.jpg)
 
-![הרוקייז הקנדיים 3](/assets/summer-2026/rockies/03.jpg)
+![](/assets/summer-2026/rockies/03.jpg)
 
-![הרוקייז הקנדיים 4](/assets/summer-2026/rockies/04.jpg)
+![](/assets/summer-2026/rockies/04.jpg)
 
-![הרוקייז הקנדיים 5](/assets/summer-2026/rockies/05.jpg)
+![](/assets/summer-2026/rockies/05.jpg)
 
-![הרוקייז הקנדיים 6](/assets/summer-2026/rockies/06.jpg)
+![](/assets/summer-2026/rockies/06.jpg)
 
-![הרוקייז הקנדיים 7](/assets/summer-2026/rockies/07.jpg)
+![](/assets/summer-2026/rockies/07.jpg)
 
-![הרוקייז הקנדיים 8](/assets/summer-2026/rockies/08.jpg)
+![](/assets/summer-2026/rockies/08.jpg)
 
-![הרוקייז הקנדיים 9](/assets/summer-2026/rockies/09.jpg)
+![](/assets/summer-2026/rockies/09.jpg)
 
-![הרוקייז הקנדיים 10](/assets/summer-2026/rockies/10.jpg)
+![](/assets/summer-2026/rockies/10.jpg)
 
-![הרוקייז הקנדיים 11](/assets/summer-2026/rockies/11.jpg)
+![](/assets/summer-2026/rockies/11.jpg)
 
-![הרוקייז הקנדיים 12](/assets/summer-2026/rockies/12.jpg)
+![](/assets/summer-2026/rockies/12.jpg)
 
-![הרוקייז הקנדיים 13](/assets/summer-2026/rockies/13.jpg)
+![](/assets/summer-2026/rockies/13.jpg)
 
-![הרוקייז הקנדיים 14](/assets/summer-2026/rockies/14.jpg)
+![](/assets/summer-2026/rockies/14.jpg)
 
-![הרוקייז הקנדיים 15](/assets/summer-2026/rockies/15.jpg)
+![](/assets/summer-2026/rockies/15.jpg)
 
-![הרוקייז הקנדיים 16](/assets/summer-2026/rockies/16.jpg)
+![](/assets/summer-2026/rockies/16.jpg)
 
-![הרוקייז הקנדיים 17](/assets/summer-2026/rockies/17.jpg)
+![](/assets/summer-2026/rockies/17.jpg)
 **רכבל, רכבת הרים והכניסה לבאנף**
 
 קמנו מוקדם, ירדנו לארוחת הבוקר במלון ויצאנו לכיוון באנף.
@@ -519,31 +519,31 @@ Icefields Parkway שייך לקבוצה השנייה.
 למחרת חיכתה לנו החזרה לארצות הברית והכניסה לפארק גליישר.
 
 **יום חמישי, 30 ביולי**
-![גליישר 1](/assets/summer-2026/glacier/01.jpg)
+![](/assets/summer-2026/glacier/01.jpg)
 
-![גליישר 2](/assets/summer-2026/glacier/02.jpg)
+![](/assets/summer-2026/glacier/02.jpg)
 
-![גליישר 3](/assets/summer-2026/glacier/03.jpg)
+![](/assets/summer-2026/glacier/03.jpg)
 
-![גליישר 4](/assets/summer-2026/glacier/04.jpg)
+![](/assets/summer-2026/glacier/04.jpg)
 
-![גליישר 5](/assets/summer-2026/glacier/05.jpg)
+![](/assets/summer-2026/glacier/05.jpg)
 
-![גליישר 6](/assets/summer-2026/glacier/06.jpg)
+![](/assets/summer-2026/glacier/06.jpg)
 
-![גליישר 7](/assets/summer-2026/glacier/07.jpg)
+![](/assets/summer-2026/glacier/07.jpg)
 
-![גליישר 8](/assets/summer-2026/glacier/08.jpg)
+![](/assets/summer-2026/glacier/08.jpg)
 
-![גליישר 9](/assets/summer-2026/glacier/09.jpg)
+![](/assets/summer-2026/glacier/09.jpg)
 
-![גליישר 10](/assets/summer-2026/glacier/10.jpg)
+![](/assets/summer-2026/glacier/10.jpg)
 
-![גליישר 11](/assets/summer-2026/glacier/11.jpg)
+![](/assets/summer-2026/glacier/11.jpg)
 
-![גליישר 12](/assets/summer-2026/glacier/12.jpg)
+![](/assets/summer-2026/glacier/12.jpg)
 
-![גליישר 13](/assets/summer-2026/glacier/13.jpg)
+![](/assets/summer-2026/glacier/13.jpg)
 **Going to the Sun Road**
 
 התעוררנו והתארגנו במהירות יחסית. בדרך עצרנו ב Starbucks לקפה.
