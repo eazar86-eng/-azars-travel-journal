@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '20260818mediafix6';
+  const VERSION = '20260818qa7';
   const $ = (s, r = document) => r.querySelector(s);
 
   function addStyles() {
@@ -156,7 +156,7 @@
     article.innerHTML=`<div class="dateHead">${esc(parsed.date)}</div><h1 class="dayTitle">${esc(parsed.title)}</h1>`;
     const media=[];
     for(const raw of lines.slice(first+1)){
-      const line=raw.trim();if(!line)continue;
+      const line=raw.trim();if(!line||/^<!--[\s\S]*-->$/.test(line)||/^\s*(?:TODO|DEBUG|PLACEHOLDER)\b/i.test(line))continue;
       const im=line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
       if(im){media.push(makePhoto(im));continue}
       let el;
@@ -175,7 +175,7 @@
     const isDate=t=>/^(מוצאי שבת|יום (ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|שבת)[, ]/.test(t)||/^\d{1,2}[\/.]\d{1,2}/.test(t);
     const finish=()=>{if(article){distributeMedia(article,media);media=[]}};
     for(const raw of lines){
-      const line=raw.trim();if(!line||/^\|/.test(line))continue;
+      const line=raw.trim();if(!line||/^\|/.test(line)||/^<!--[\s\S]*-->$/.test(line)||/^\s*(?:TODO|DEBUG|PLACEHOLDER)\b/i.test(line))continue;
       const clean=line.replace(/^\*\*|\*\*$/g,'').trim();
       if(isDate(clean)){
         finish();article=document.createElement('article');article.className='dayMaster';
