@@ -1,0 +1,38 @@
+name: Fix Summer 2026 journal start
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-summer2026-start.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start journal at trip departure
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('trips/summer-2026/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = "render(main,root);render(day17,root);"
+          new = "const tripStart=main.indexOf('**מוצאי שבת, 18 ביולי**');const journal=tripStart>=0?main.slice(tripStart):main;render(journal,root);render(day17,root);"
+          if old not in s:
+              raise SystemExit('Expected render marker not found')
+          s = s.replace(old, new, 1)
+          s = s.replace('20260817full6', '20260818full7', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit journal start fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trips/summer-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Start Summer 2026 journal at departure day'
+          git push
