@@ -1,6 +1,6 @@
 name: QA polish Summer 2026
 
-# triggered QA pass 2026-08-18
+# triggered QA pass 2026-08-18 image-label fix
 on:
   push:
     paths:
@@ -25,32 +25,42 @@ jobs:
 
           js = Path('assets/js/summer-2026-master.js')
           s = js.read_text(encoding='utf-8')
-          s = s.replace("const VERSION = '20260818mediafix6';", "const VERSION = '20260818qa7';")
+          s = s.replace("const VERSION = '20260818qa7';", "const VERSION = '20260818qa8';")
+          s = s.replace("const VERSION = '20260818mediafix6';", "const VERSION = '20260818qa8';")
 
           # Never render HTML comments, build markers, TODOs or internal photo delimiters.
           s = s.replace("const line=raw.trim();if(!line)continue;", "const line=raw.trim();if(!line||/^<!--[\\s\\S]*-->$/.test(line)||/^\\s*(?:TODO|DEBUG|PLACEHOLDER)\\b/i.test(line))continue;", 1)
           s = s.replace("const line=raw.trim();if(!line||/^\\|/.test(line))continue;", "const line=raw.trim();if(!line||/^\\|/.test(line)||/^<!--[\\s\\S]*-->$/.test(line)||/^\\s*(?:TODO|DEBUG|PLACEHOLDER)\\b/i.test(line))continue;", 1)
+
+          # Decorative journal photos should never expose numbered alt labels on failure.
+          s = re.sub(r"img\.alt=im\[1\]", "img.alt=''", s)
+          s = s.replace("img.onerror=()=>wrap.classList.add('imageError');", "img.onerror=()=>{wrap.classList.add('imageError');wrap.remove()};")
           js.write_text(s, encoding='utf-8')
 
-          # Clean internal editorial markers from the source content itself.
+          # Clean source markers and numbered image labels.
           content = Path('content/summer-2026.md')
           c = content.read_text(encoding='utf-8')
           c = re.sub(r'^\s*<!--\s*[A-Z0-9_ -]*(?:PHOTOS?|GALLERY|MEDIA)[A-Z0-9_ -]*(?:START|END)\s*-->\s*\n?', '', c, flags=re.M|re.I)
           c = re.sub(r'^\s*<!--\s*(?:START|END)[A-Z0-9_ -]*\s*-->\s*\n?', '', c, flags=re.M|re.I)
+          c = re.sub(r'!\[[^\]]*\]\((/assets/summer-2026/[^)]+)\)', r'![](\1)', c)
           c = c.replace(
               "את טיסות הפנים חילקנו בין מספר חברות. מניו יורק לסיאטל טסנו עם יונייטד, מסיאטל להוואי עם דלתא, ומביג איילנד ללוס אנג'לס שוב עם יונייטד.",
               "את טיסות הפנים חילקנו בין מספר חברות. מניו יורק לסיאטל טסנו עם יונייטד, מסיאטל לביג איילנד עם דלתא, מביג איילנד למאווי עם Hawaiian Airlines, וממאווי ללוס אנג'לס שוב עם יונייטד."
           )
           content.write_text(c, encoding='utf-8')
 
-          # Harden the original inline fallback renderer as well.
+          # Harden original inline fallback: it renders text only. Master renderer owns all journal photos.
           page = Path('trips/summer-2026/index.html')
           h = page.read_text(encoding='utf-8')
           h = h.replace("const line=raw.trim();if(!line||/^\\|[- :|]+$/.test(line)||/^\\|/.test(line))continue;", "const line=raw.trim();if(!line||/^\\|[- :|]+$/.test(line)||/^\\|/.test(line)||/^<!--[\\s\\S]*-->$/.test(line))continue;")
+          h = re.sub(r"const im=line\.match\(/\^!\\\[\(\[\^\\\]\]\*\)\\\]\\\(\(\[\^\)\]\+\)\\\)\$/\);if\(im\)\{.*?continue\}", "const im=line.match(/^!\\[([^\\]]*)\\]\\(([^)]+)\\)$/);if(im){continue}", h, count=1)
+          # Simpler exact fallback if the minified block remains unchanged.
+          old = "const im=line.match(/^!\\[([^\\]]*)\\]\\(([^)]+)\\)$/);if(im){if(!current)current=card('יומן המסע');const w=document.createElement('div');w.className='photo';const img=document.createElement('img');img.src=im[2];img.alt=im[1];img.loading='lazy';w.appendChild(img);current.appendChild(w);continue}"
+          h = h.replace(old, "const im=line.match(/^!\\[([^\\]]*)\\]\\(([^)]+)\\)$/);if(im){continue}")
           h = h.replace('שלוש חברות תעופה וארבעה רכבים שונים', 'ארבע חברות תעופה וארבעה רכבים שונים')
           h = h.replace('שלוש חברות תעופה.<br>מסע אחד.', 'ארבע חברות תעופה.<br>מסע אחד.')
           h = h.replace('את המסע פתחנו עם אל על לניו יורק, המשכנו בטיסות פנים עם United ו Delta, ואת הדרך חזרה אנחנו מתחילים מלוס אנג׳לס. החברות עצמן הן חלק מהסיפור של הדרך.', 'את המסע פתחנו עם EL AL לניו יורק, המשכנו ל־Seattle עם United, לביג איילנד עם Delta, בין האיים עם Hawaiian Airlines, ממאווי ללוס אנג׳לס עם United, ואת הדרך הביתה עם EL AL.')
-          h = h.replace('/assets/js/summer-2026-master.js?v=20260818qa1', '/assets/js/summer-2026-master.js?v=20260818qa7')
+          h = re.sub(r'/assets/js/summer-2026-master\.js\?v=[^"\']+', '/assets/js/summer-2026-master.js?v=20260818qa8', h)
           page.write_text(h, encoding='utf-8')
           PY
 
@@ -61,6 +71,9 @@ jobs:
           node --check assets/js/summer-2026-master.js
           ! grep -Eini 'photos[ _-]*(start|end)|gallery[ _-]*(start|end)|media[ _-]*(start|end)|placeholder|debug' content/summer-2026.md
           ! grep -Eini '<!--[^>]*(START|END)[^>]*-->' content/summer-2026.md
+          ! grep -Eini '!\[[^]]+[[:space:]][0-9]+\]\(' content/summer-2026.md
+          ! grep -q "img.alt=im\[1\]" assets/js/summer-2026-master.js
+          grep -q "img.alt=''" assets/js/summer-2026-master.js
           grep -q 'Hawaiian Airlines' assets/js/summer-2026-master.js
           grep -q "'Big Island','Maui'" assets/js/summer-2026-master.js
           grep -q "'Maui','Los Angeles'" assets/js/summer-2026-master.js
@@ -73,7 +86,7 @@ jobs:
           for f in elal united delta hawaiian; do test -s "assets/transport/airlines/$f.svg"; done
           grep -q 'id="journal"' trips/summer-2026/index.html
           grep -q 'id="route"' trips/summer-2026/index.html
-          grep -q '20260818qa7' trips/summer-2026/index.html
+          grep -q '20260818qa8' trips/summer-2026/index.html
 
       - name: Commit QA fixes
         shell: bash
@@ -82,5 +95,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add assets/js/summer-2026-master.js content/summer-2026.md trips/summer-2026/index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'QA polish Summer 2026 content and rendering'
+          git commit -m 'Remove journal image labels and harden photo rendering'
           git push
