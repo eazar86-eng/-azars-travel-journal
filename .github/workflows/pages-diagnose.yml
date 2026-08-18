@@ -1,0 +1,49 @@
+name: Diagnose and Fix GitHub Pages
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pages-diagnose.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read current Pages configuration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          echo '=== CURRENT PAGES CONFIG ==='
+          gh api repos/${{ github.repository }}/pages | tee pages-before.json || true
+      - name: Force Pages to publish from main root
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh api --method PUT repos/${{ github.repository }}/pages \
+            -f build_type=legacy \
+            -f 'source[branch]=main' \
+            -f 'source[path]=/' || true
+          echo '=== UPDATED PAGES CONFIG ==='
+          gh api repos/${{ github.repository }}/pages | tee pages-after.json || true
+      - name: Save diagnostic result
+        run: |
+          mkdir -p .pages-diagnostic
+          cp pages-before.json .pages-diagnostic/before.json 2>/dev/null || true
+          cp pages-after.json .pages-diagnostic/after.json 2>/dev/null || true
+          date -u +'%Y-%m-%dT%H:%M:%SZ' > .pages-diagnostic/last-run.txt
+      - name: Commit diagnostic result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .pages-diagnostic
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record GitHub Pages configuration and source fix'
+          git push
