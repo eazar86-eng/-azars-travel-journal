@@ -1,0 +1,93 @@
+name: Verify Summer 2026 Mobile
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '_diagnostics/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Playwright with Chromium dependencies
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify live mobile page
+        run: |
+          mkdir -p _diagnostics
+          cat > /tmp/check.js <<'JS'
+          const fs = require('fs');
+          const { chromium } = require('playwright');
+          (async()=>{
+            const data = { ok:false, checkedAt:new Date().toISOString() };
+            let browser;
+            try {
+              browser = await chromium.launch({headless:true});
+              const page = await browser.newPage({viewport:{width:390,height:844}, deviceScaleFactor:1});
+              const url = 'https://azarstravel.com/trips/summer-2026/?check=' + Date.now();
+              await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+              await page.waitForTimeout(3000);
+              Object.assign(data, await page.evaluate(() => {
+                const q=s=>document.querySelector(s);
+                const qa=s=>[...document.querySelectorAll(s)];
+                const story=q('#story');
+                const tools=q('.toolsIn');
+                const snap=q('.snapshot');
+                const bodyText=document.body.innerText;
+                const firstP=q('#story p');
+                return {
+                  title:document.title,
+                  bodyWidth:document.body.scrollWidth,
+                  viewportWidth:innerWidth,
+                  horizontalOverflow:document.body.scrollWidth > innerWidth + 2,
+                  cssLoaded:!!q('link[href*="summer-2026-polish.css"]'),
+                  jsLoaded:!!q('script[src*="summer-2026-polish.js"]'),
+                  storyStart:story ? story.innerText.slice(0,320) : null,
+                  dayCards:qa('#story .trip-day-card').length,
+                  firstDate:q('#story .dateHead')?.textContent?.trim() || null,
+                  firstTitle:q('#story .dayTitle')?.textContent?.trim() || null,
+                  firstParagraphFont:firstP ? getComputedStyle(firstP).fontSize : null,
+                  firstParagraphLineHeight:firstP ? getComputedStyle(firstP).lineHeight : null,
+                  toolsScrollable:tools ? tools.scrollWidth > tools.clientWidth : false,
+                  toolsOverflowX:tools ? getComputedStyle(tools).overflowX : null,
+                  snapshotHeight:snap?.getBoundingClientRect().height || null,
+                  hasFourCarsText:bodyText.includes('4 רכבים') || bodyText.includes('ארבעה רכבים'),
+                  hasFlightsSection:bodyText.includes('פינת הטיסות שלנו'),
+                  hasCarsSection:bodyText.includes('פינת הרכבים שלנו'),
+                  firstCardRadius:q('.trip-day-card') ? getComputedStyle(q('.trip-day-card')).borderRadius : null
+                };
+              }));
+              data.ok = !data.horizontalOverflow && data.cssLoaded && data.jsLoaded && data.dayCards > 0 && /18 ביולי/.test(data.storyStart||'') && /יוצאים לדרך/.test(data.storyStart||'') && data.hasFourCarsText && data.hasFlightsSection && data.hasCarsSection;
+              await page.screenshot({path:'_diagnostics/summer-2026-mobile.png',fullPage:true});
+            } catch(e) {
+              data.error = String(e && e.stack || e);
+            } finally {
+              fs.writeFileSync('_diagnostics/summer-2026-mobile.json', JSON.stringify(data,null,2));
+              if(browser) await browser.close();
+            }
+            if(!data.ok) process.exitCode = 2;
+          })();
+          JS
+          node /tmp/check.js
+
+      - name: Save verification diagnostics
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _diagnostics/summer-2026-mobile.json _diagnostics/summer-2026-mobile.png || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Summer 2026 mobile verification"
+            git push
+          fi
