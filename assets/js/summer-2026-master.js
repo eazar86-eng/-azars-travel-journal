@@ -83,12 +83,32 @@
     const g=document.createElement('div');g.className='dayGallery';media.forEach(x=>g.appendChild(x));article.appendChild(g);
   }
 
+  function anchorFor(t){
+    const x=t.replace(/\s+/g,' ').trim();
+    let m=x.match(/(?:^|\D)(\d{1,2})[\/.](\d{1,2})(?:\D|$)/);
+    if(m)return `day-${String(m[1]).padStart(2,'0')}${String(m[2]).padStart(2,'0')}`;
+    if(/18 ביולי/.test(x))return 'day-1807';
+    if(/19 ביולי/.test(x))return 'day-1907';
+    if(/22 ביולי|סיאטל/.test(x))return 'seattle';
+    if(/23 ביולי|רוקייז/.test(x))return 'rockies';
+    if(/30 ביולי|גליישר/.test(x))return 'glacier';
+    if(/4 באוגוסט/.test(x))return 'hawaii';
+    return '';
+  }
+
+  function parseDayHeading(heading){
+    const pipe=heading.split('|').map(x=>x.trim());
+    if(pipe.length>1)return {date:pipe[0],title:pipe.slice(1).join(' | ')};
+    const m=heading.match(/^(\d{1,2}[\/.]\d{1,2})\s+(.*)$/);
+    return m?{date:m[1],title:m[2]}:{date:heading,title:heading};
+  }
+
   function renderSingleDay(md){
     const lines=md.split(/\r?\n/); const first=lines.findIndex(x=>/^#\s+/.test(x.trim())); if(first<0)return null;
-    const heading=lines[first].trim().replace(/^#\s+/,''); const parts=heading.split('|').map(x=>x.trim());
-    const art=document.createElement('article');art.className='dayMaster';
-    const d=document.createElement('div');d.className='dateHead';d.textContent=parts[0];art.appendChild(d);
-    const h=document.createElement('h1');h.className='dayTitle';h.textContent=parts.slice(1).join(' | ')||parts[0];art.appendChild(h);
+    const heading=lines[first].trim().replace(/^#\s+/,''); const parsed=parseDayHeading(heading);
+    const art=document.createElement('article');art.className='dayMaster';const aid=anchorFor(parsed.date);if(aid)art.id=aid;
+    const d=document.createElement('div');d.className='dateHead';d.textContent=parsed.date;art.appendChild(d);
+    const h=document.createElement('h1');h.className='dayTitle';h.textContent=parsed.title;art.appendChild(h);
     let media=[];
     const flush=()=>{appendMediaGroup(art,media);media=[]};
     for(const raw of lines.slice(first+1)){
@@ -108,7 +128,7 @@
     const lines=md.split(/\r?\n/);let art=null,expectTitle=false,media=[];
     const flush=()=>{if(art){appendMediaGroup(art,media);media=[]}};
     const isDate=t=>/^(מוצאי שבת|יום (ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|שבת)[, ]/.test(t)||/^\d{1,2}[\/.]\d{1,2}/.test(t);
-    for(const raw of lines){const line=raw.trim();if(!line||/^\|/.test(line))continue;const clean=line.replace(/^\*\*|\*\*$/g,'').trim();if(isDate(clean)){flush();art=document.createElement('article');art.className='dayMaster';const d=document.createElement('div');d.className='dateHead';d.textContent=clean;art.appendChild(d);root.appendChild(art);expectTitle=true;continue}const im=line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);if(im&&art){const w=document.createElement('div');w.className='photo';const img=document.createElement('img');img.src=im[2]+(im[2].includes('?')?'&':'?')+'v='+VERSION;img.alt=im[1];img.loading='lazy';img.onload=()=>{if(img.naturalHeight>img.naturalWidth*1.2)w.classList.add('portrait')};w.appendChild(img);media.push(w);continue}if(!art)continue;flush();let el;if(expectTitle&&(/^\*\*.+\*\*$/.test(line)||/^#{1,3}\s/.test(line))){el=document.createElement('h1');el.className='dayTitle';el.innerHTML=inline(line.replace(/^#{1,3}\s*/,''));expectTitle=false}else if(/^##\s+/.test(line)){el=document.createElement('h2');el.innerHTML=inline(line.replace(/^##\s+/,''))}else if(/^###\s+/.test(line)){el=document.createElement('h3');el.innerHTML=inline(line.replace(/^###\s+/,''))}else{el=document.createElement('p');el.innerHTML=inline(clean)}art.appendChild(el)}flush();
+    for(const raw of lines){const line=raw.trim();if(!line||/^\|/.test(line))continue;const clean=line.replace(/^\*\*|\*\*$/g,'').trim();if(isDate(clean)){flush();art=document.createElement('article');art.className='dayMaster';const aid=anchorFor(clean);if(aid)art.id=aid;const d=document.createElement('div');d.className='dateHead';d.textContent=clean;art.appendChild(d);root.appendChild(art);expectTitle=true;continue}const im=line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);if(im&&art){const w=document.createElement('div');w.className='photo';const img=document.createElement('img');img.src=im[2]+(im[2].includes('?')?'&':'?')+'v='+VERSION;img.alt=im[1];img.loading='lazy';img.onload=()=>{if(img.naturalHeight>img.naturalWidth*1.2)w.classList.add('portrait')};w.appendChild(img);media.push(w);continue}if(!art)continue;flush();let el;if(expectTitle&&(/^\*\*.+\*\*$/.test(line)||/^#{1,3}\s/.test(line))){el=document.createElement('h1');el.className='dayTitle';el.innerHTML=inline(line.replace(/^#{1,3}\s*/,''));expectTitle=false}else if(/^##\s+/.test(line)){el=document.createElement('h2');el.innerHTML=inline(line.replace(/^##\s+/,''))}else if(/^###\s+/.test(line)){el=document.createElement('h3');el.innerHTML=inline(line.replace(/^###\s+/,''))}else{el=document.createElement('p');el.innerHTML=inline(clean)}art.appendChild(el)}flush();
   }
 
   async function rebuildJournal(){
