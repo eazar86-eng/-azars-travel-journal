@@ -1,5 +1,6 @@
 name: Use real car photos
 
+# trigger real photo replacement 2026-08-18
 on:
   push:
     paths:
@@ -30,39 +31,20 @@ jobs:
             'tahoe': "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/%2721_Chevrolet_Tahoe.jpg/960px-%2721_Chevrolet_Tahoe.jpg",
             'traverse': "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/2024_Chevrolet_Traverse_front_view.jpg/960px-2024_Chevrolet_Traverse_front_view.jpg",
           }
-          credits = {
-            'Chevrolet Suburban': 'Photo: Charles · CC BY 2.0',
-            'Nissan Pathfinder': 'Photo: Elise240SX · CC BY-SA 4.0',
-            'Chevrolet Tahoe': 'Photo: Bull-Doser · Public domain',
-            'Chevrolet Traverse': 'Photo: Deathpallie325 · CC BY-SA 4.0',
-          }
 
+          # Replace the four embedded SVG data images, in card order.
+          for url in [photos['suburban'],photos['pathfinder'],photos['tahoe'],photos['traverse']]:
+              s = re.sub(r"photo:'data:image/svg\+xml;base64,[^']+',fallback:'data:image/svg\+xml;base64,[^']+'", f"photo:'{url}',fallback:''", s, count=1)
+
+          # Handle any prior local SVG source variant.
           for key,url in photos.items():
-              pattern = rf"photo:'data:image/svg\+xml;base64,[^']+',fallback:'data:image/svg\+xml;base64,[^']+'(?=,name:'[^']+')"
-              m = re.search(pattern, s)
-              if m:
-                  s = s[:m.start()] + f"photo:'{url}',fallback:''" + s[m.end():]
+              s = re.sub(rf"photo:'[^']*{key}\.svg',fallback:'[^']*{key}\.svg'", f"photo:'{url}',fallback:''", s, count=1)
 
-          # If data URLs have already been removed, replace any local illustrated sources directly by model order.
-          replacements = [
-            ('suburban', photos['suburban']),
-            ('pathfinder', photos['pathfinder']),
-            ('tahoe', photos['tahoe']),
-            ('traverse', photos['traverse']),
-          ]
-          for key,url in replacements:
-              s = re.sub(rf"photo:'[^']*{key}[^']*',fallback:'[^']*'", f"photo:'{url}',fallback:''", s, count=1)
-
-          for model, credit in credits.items():
-              s = s.replace(f"<h4>${{c.name}}</h4><p><strong>${{c.place}}</strong><br>${{c.note}}</p><p class=\"carMasterCredit\">Representative model visual</p>", "<h4>${c.name}</h4><p><strong>${c.place}</strong><br>${c.note}</p><p class=\"carMasterCredit\">${c.credit}</p>")
-
-          # Add per-card credit field if missing.
           s = s.replace("name:'Chevrolet Suburban',place:", "name:'Chevrolet Suburban',credit:'Photo: Charles · CC BY 2.0',place:")
           s = s.replace("name:'Nissan Pathfinder',place:", "name:'Nissan Pathfinder',credit:'Photo: Elise240SX · CC BY-SA 4.0',place:")
           s = s.replace("name:'Chevrolet Tahoe',place:", "name:'Chevrolet Tahoe',credit:'Photo: Bull-Doser · Public domain',place:")
           s = s.replace("name:'Chevrolet Traverse',place:", "name:'Chevrolet Traverse',credit:'Photo: Deathpallie325 · CC BY-SA 4.0',place:")
           s = s.replace('Representative model visual', '${c.credit || ""}')
-          s = s.replace("if(fallback && img.src.indexOf(fallback)===-1){img.src=fallback;return}\n      img.closest('.carMasterMedia')?.classList.add('imageError');", "img.closest('.carMasterMedia')?.classList.add('imageError');")
           js.write_text(s, encoding='utf-8')
 
           page = Path('trips/summer-2026/index.html')
