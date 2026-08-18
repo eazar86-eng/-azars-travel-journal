@@ -1,0 +1,92 @@
+name: Restore and editorialize Summer 2026
+
+on:
+  push:
+    paths:
+      - '.github/workflows/restore-and-editorialize-summer2026.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+      - name: Restore last good script and add magazine flow
+        run: |
+          git show bbf924f48b9b10e144d6091ca7f6afae05c4b272^:assets/js/summer-2026-master.js > assets/js/summer-2026-master.js
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('assets/js/summer-2026-master.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("const VERSION = '20260818qa1';", "const VERSION = '20260818editorial2';", 1)
+
+          css_old="""      .dayGallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px 0}.dayGallery .photo{margin:0}.dayGallery .photo:first-child:nth-last-child(1){grid-column:1/-1}.dayGallery img{width:100%;height:100%;max-height:520px;object-fit:cover;border-radius:16px}.dayGallery .portrait img{object-fit:contain;background:#ece7df}.dayMaster{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4vw,34px);margin-bottom:18px;box-shadow:0 12px 34px rgba(52,43,32,.045)}"""
+          css_new="""      .dayGallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:28px 0 32px}.dayGallery .photo{margin:0}.dayGallery .photo:first-child:nth-last-child(1){grid-column:1/-1}.dayGallery img{width:100%;height:100%;max-height:560px;object-fit:cover;border-radius:16px}.dayGallery .portrait img{object-fit:contain;background:#ece7df}.storyPhoto{margin:30px 0 34px}.storyPhoto img{width:100%;max-height:720px;object-fit:cover;border-radius:18px}.editorialQuote{position:relative;margin:58px -8% 62px;padding:34px 8%;border-top:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center}.editorialQuote:before{content:'“';display:block;font-family:Georgia,\"Times New Roman\",serif;font-size:68px;line-height:.7;color:var(--rust);margin-bottom:12px}.editorialQuote p{font-family:Georgia,\"Times New Roman\",serif!important;font-size:clamp(28px,4.5vw,46px)!important;line-height:1.35!important;color:var(--ink)!important;margin:0!important}.editorialQuote small{display:block;margin-top:15px;color:var(--rust);font-size:10px;font-weight:950;letter-spacing:.14em}.dayMaster{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4vw,34px);margin-bottom:18px;box-shadow:0 12px 34px rgba(52,43,32,.045)}"""
+          if css_old not in s: raise SystemExit('CSS marker not found')
+          s=s.replace(css_old,css_new,1)
+          s=s.replace("@media(max-width:650px){", "@media(max-width:650px){.editorialQuote{margin:44px 0 48px;padding:28px 4px}.editorialQuote p{font-size:30px!important}", 1)
+
+          marker="""  function anchorFor(t){\n"""
+          helper=r'''  function integrateStoryMedia(article){
+    if(!article)return;
+    const media=[];
+    article.querySelectorAll('.dayGallery').forEach(g=>{g.querySelectorAll('.photo').forEach(x=>media.push(x));g.remove()});
+    article.querySelectorAll(':scope > .photo').forEach(x=>{media.push(x);x.remove()});
+    if(!media.length)return;
+    const paras=[...article.querySelectorAll(':scope > p')];
+    if(!paras.length){appendMediaGroup(article,media);return}
+    const groups=[];
+    while(media.length){groups.push(media.splice(0,media.length>5?2:1))}
+    groups.forEach((group,i)=>{
+      const pos=Math.min(paras.length-1,Math.max(0,Math.round(((i+1)/(groups.length+1))*paras.length)-1));
+      const anchor=paras[pos];
+      let node;
+      if(group.length===1){node=group[0];node.classList.add('storyPhoto')}
+      else{node=document.createElement('div');node.className='dayGallery editorialSpread';group.forEach(x=>node.appendChild(x))}
+      anchor.insertAdjacentElement('afterend',node);
+    });
+  }
+
+  function injectEditorialQuotes(root){
+    root.querySelectorAll('.editorialQuote').forEach(x=>x.remove());
+    const quotes=[
+      'לא רצינו עוד חופשה. רצינו קיץ שיישאר איתנו הרבה אחרי שהמזוודות ייסגרו.',
+      'יש ימים שבהם הדרך עצמה הופכת ליעד.',
+      'מההרים של קנדה אל האוקיינוס של הוואי, כל מעבר הרגיש כמו התחלה של מסע חדש.',
+      'בסוף נשארים פחות עם רשימת המקומות ויותר עם הרגעים שעברנו יחד.'
+    ];
+    const articles=[...root.querySelectorAll('.dayMaster')];
+    if(!articles.length)return;
+    const picks=[.18,.40,.65,.86].map(x=>articles[Math.min(articles.length-1,Math.round((articles.length-1)*x))]);
+    picks.forEach((article,i)=>{
+      if(!article)return;
+      const q=document.createElement('aside');q.className='editorialQuote';
+      q.innerHTML=`<p>${quotes[i]}</p><small>AZAR’S TRAVEL · FROM THE ROAD</small>`;
+      article.insertAdjacentElement('afterend',q);
+    });
+  }
+
+'''
+          if marker not in s: raise SystemExit('function marker not found')
+          s=s.replace(marker,helper+marker,1)
+
+          old="""      days.forEach(md=>{if(!md)return;const a=renderSingleDay(md);if(a)root.appendChild(a)});\n      if(location.hash){const target=$(location.hash);if(target)setTimeout(()=>target.scrollIntoView(),80)}\n"""
+          new="""      days.forEach(md=>{if(!md)return;const a=renderSingleDay(md);if(a)root.appendChild(a)});\n      root.querySelectorAll('.dayMaster').forEach(integrateStoryMedia);\n      injectEditorialQuotes(root);\n      if(location.hash){const target=$(location.hash);if(target)setTimeout(()=>target.scrollIntoView(),80)}\n"""
+          if old not in s: raise SystemExit('rebuild marker not found')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          node --check assets/js/summer-2026-master.js
+      - name: Commit restored editorial script
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/js/summer-2026-master.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Restore Summer 2026 script and integrate photos through story'
+          git push
