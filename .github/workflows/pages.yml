@@ -37,7 +37,7 @@ jobs:
           new = "const tripStart=main.indexOf('**מוצאי שבת, 18 ביולי**');const journal=tripStart>=0?main.slice(tripStart):main;render(journal,root);render(day17,root);"
           if old in s:
               s = s.replace(old, new, 1)
-          s = s.replace('20260817full6', '20260818full7', 1)
+          s = s.replace('20260817full6', '20260818full8', 1)
           p.write_text(s, encoding='utf-8')
           PY
 
@@ -49,6 +49,19 @@ jobs:
         with:
           source: ./
           destination: ./_site
+
+      - name: Apply Summer 2026 editorial mobile polish
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('_site/trips/summer-2026/index.html')
+          s = p.read_text(encoding='utf-8')
+          css = '<link rel="stylesheet" href="/assets/css/summer-2026-polish.css?v=20260818mag1">'
+          js = '<script defer src="/assets/js/summer-2026-polish.js?v=20260818mag1"></script>'
+          if css not in s:
+              s = s.replace('</head>', css + js + '</head>', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
