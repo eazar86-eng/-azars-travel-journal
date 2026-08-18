@@ -1,5 +1,6 @@
 name: Embed car visuals
 
+# trigger 2026-08-18
 on:
   push:
     paths:
