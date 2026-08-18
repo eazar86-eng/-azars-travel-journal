@@ -1,12 +1,12 @@
 trip_name: "מסע קיץ 2026"
 current_region: "לוס אנג׳לס"
 current_island: "לוס אנג׳לס"
-current_day: "15.08"
-current_day_anchor: "day-1508"
-current_day_title: "משנים תוכניות ונוסעים ליוניברסל"
-current_summary: "ב־15 באוגוסט שינינו את התוכנית ברגע האחרון ובמקום Palm Springs חזרנו ליוניברסל. נכנסנו רק בצהריים, השתמשנו ב־Express, עברנו בין הארי פוטר, Springfield, המיניונים, Studio Tour, ה־Lower Lot ו־SUPER NINTENDO WORLD, וסיגל ואריאל הכריזו ש־Fast & Furious: Hollywood Drift הוא המתקן הכי כיף שעשו עד היום. את הערב סיימנו בסיבוב ב־Universal CityWalk, בחנויות ומשם חזרנו למלון."
-current_page: "/trips/summer-2026/#day-1508"
-version: "20260815universal4"
+current_day: "17.08"
+current_day_anchor: "day-1708"
+current_day_title: "האימון עם Jordan Lawley וסנטה מוניקה"
+current_summary: "הפרק האחרון במסע קיץ 2026 היה אחד הימים שחיכינו להם במיוחד בלוס אנג׳לס: אריאל באימון של שלוש שעות עם Jordan Lawley, בזמן שסיגל, נויה ועומרי ניצלו את הזמן לשופינג ב South Coast Plaza. את היום סגרנו בסנטה מוניקה."
+current_page: "/trips/summer-2026/day-1708/"
+version: "20260817jordan-pagesfix1"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
