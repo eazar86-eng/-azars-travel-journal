@@ -1,5 +1,6 @@
 name: Publish real car photos v13
 
+# trigger 2026-08-18 14:36 PT
 on:
   push:
     paths:
