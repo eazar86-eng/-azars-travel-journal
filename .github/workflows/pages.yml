@@ -27,6 +27,20 @@ jobs:
         run: |
           gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow || true
 
+      - name: Make Summer 2026 journal start at departure day
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('trips/summer-2026/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = "render(main,root);render(day17,root);"
+          new = "const tripStart=main.indexOf('**מוצאי שבת, 18 ביולי**');const journal=tripStart>=0?main.slice(tripStart):main;render(journal,root);render(day17,root);"
+          if old in s:
+              s = s.replace(old, new, 1)
+          s = s.replace('20260817full6', '20260818full7', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
