@@ -1,0 +1,55 @@
+name: Fix car images direct
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-car-images-direct.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Point vehicle cards to existing local visuals
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          js = Path('assets/js/summer-2026-master.js')
+          s = js.read_text(encoding='utf-8')
+          s = s.replace("const VERSION = '20260818qa9';", "const VERSION = '20260818cars10';")
+          for name in ['suburban','pathfinder','tahoe','traverse']:
+              s = s.replace(f"photo:'/assets/transport/cars/{name}.jpg',fallback:'/assets/transport/cars/{name}.svg'", f"photo:'/assets/transport/cars/{name}.svg',fallback:'/assets/transport/cars/{name}.svg'")
+          js.write_text(s, encoding='utf-8')
+
+          page = Path('trips/summer-2026/index.html')
+          h = page.read_text(encoding='utf-8')
+          h = re.sub(r'/assets/js/summer-2026-master\.js\?v=[^"\']+', '/assets/js/summer-2026-master.js?v=20260818cars10', h)
+          page.write_text(h, encoding='utf-8')
+          PY
+      - name: QA vehicle visuals
+        run: |
+          set -e
+          node --check assets/js/summer-2026-master.js
+          for f in suburban pathfinder tahoe traverse; do
+            test -s "assets/transport/cars/$f.svg"
+            grep -q "/assets/transport/cars/$f.svg" assets/js/summer-2026-master.js
+          done
+          ! grep -q '/assets/transport/cars/suburban.jpg' assets/js/summer-2026-master.js
+          ! grep -q '/assets/transport/cars/pathfinder.jpg' assets/js/summer-2026-master.js
+          ! grep -q '/assets/transport/cars/tahoe.jpg' assets/js/summer-2026-master.js
+          ! grep -q '/assets/transport/cars/traverse.jpg' assets/js/summer-2026-master.js
+          grep -q '20260818cars10' trips/summer-2026/index.html
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/js/summer-2026-master.js trips/summer-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix vehicle images with stable local sources'
+          git push
