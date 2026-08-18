@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -22,52 +22,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Ensure Pages uses GitHub Actions
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow || true
-
-      - name: Persist Summer 2026 presentation in source
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('trips/summer-2026/index.html')
-          s = p.read_text(encoding='utf-8')
-
-          css = '<link rel="stylesheet" href="/assets/css/summer-2026-polish.css?v=20260818mag4">'
-          js = '<script defer src="/assets/js/summer-2026-polish.js?v=20260818mag4"></script>'
-
-          if 'summer-2026-polish.css' not in s:
-              s = s.replace('</head>', css + js + '</head>', 1)
-          else:
-              import re
-              s = re.sub(r'<link rel="stylesheet" href="/assets/css/summer-2026-polish\.css\?v=[^"]+">', css, s, count=1)
-              s = re.sub(r'<script defer src="/assets/js/summer-2026-polish\.js\?v=[^"]+"></script>', js, s, count=1)
-
-          old = "render(main,root);render(day17,root);"
-          new = "const tripStart=main.indexOf('**מוצאי שבת, 18 ביולי**');const journal=tripStart>=0?main.slice(tripStart):main;render(journal,root);render(day17,root);"
-          if old in s:
-              s = s.replace(old, new, 1)
-
-          for oldver in ['20260817full6','20260818full7','20260818full8','20260818full9','20260818full10']:
-              s = s.replace(oldver, '20260818full11')
-
-          p.write_text(s, encoding='utf-8')
-          PY
-
-          if ! git diff --quiet -- trips/summer-2026/index.html; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add trips/summer-2026/index.html
-            git commit -m "Persist Summer 2026 mobile presentation"
-            git push
-            echo "Source persisted; the follow-up run will publish the committed version."
-            exit 0
-          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -77,6 +37,58 @@ jobs:
         with:
           source: ./
           destination: ./_site
+
+      - name: Finalize Summer 2026 page inside the built site
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          page = Path('_site/trips/summer-2026/index.html')
+          css_path = Path('_site/assets/css/summer-2026-polish.css')
+          js_path = Path('_site/assets/js/summer-2026-polish.js')
+
+          s = page.read_text(encoding='utf-8')
+          css = css_path.read_text(encoding='utf-8')
+          js = js_path.read_text(encoding='utf-8')
+
+          # Do not rely on separately cached presentation assets.
+          s = re.sub(r'<link[^>]+summer-2026-polish\.css[^>]*>', '', s)
+          s = re.sub(r'<script[^>]+summer-2026-polish\.js[^>]*></script>', '', s)
+          s = re.sub(r'<style id="summer-2026-inline-polish">.*?</style>', '', s, flags=re.S)
+          s = re.sub(r'<script id="summer-2026-inline-polish-js">.*?</script>', '', s, flags=re.S)
+
+          # The journal must begin at the actual departure day, not the planning intro.
+          plain = "render(main,root);render(day17,root);"
+          sliced = "const tripStart=main.indexOf('**מוצאי שבת, 18 ביולי**');const journal=tripStart>=0?main.slice(tripStart):main;render(journal,root);render(day17,root);"
+          if plain in s:
+              s = s.replace(plain, sliced, 1)
+
+          # Bust only the journal source request; styling is now inline.
+          s = re.sub(r'/content/summer-2026\.md\?v=[^\'\"]+', '/content/summer-2026.md?v=20260818stable1', s, count=1)
+
+          inline = f'<style id="summer-2026-inline-polish">{css}</style><script id="summer-2026-inline-polish-js">{js}</script>'
+          s = s.replace('</head>', inline + '</head>', 1)
+          page.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Validate built Summer 2026 HTML
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s = Path('_site/trips/summer-2026/index.html').read_text(encoding='utf-8')
+          checks = {
+            'inline CSS': 'summer-2026-inline-polish' in s,
+            'inline JS': 'summer-2026-inline-polish-js' in s,
+            'journal slicing': "main.slice(tripStart)" in s,
+            '4 cars': '4 רכבים' in s,
+            'flights section': 'פינת הטיסות שלנו' in s,
+            'cars section': 'פינת הרכבים שלנו' in s,
+          }
+          print(checks)
+          if not all(checks.values()):
+              raise SystemExit('Built page validation failed')
+          PY
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -98,9 +110,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Install browser verifier
         run: |
           npm init -y >/dev/null 2>&1
@@ -109,68 +118,37 @@ jobs:
 
       - name: Verify live mobile page
         run: |
-          mkdir -p _diagnostics
           cat > /tmp/check.js <<'JS'
           const { chromium } = require('playwright');
           (async()=>{
             const browser = await chromium.launch({headless:true});
             const page = await browser.newPage({viewport:{width:390,height:844}, deviceScaleFactor:1});
             const url = 'https://azarstravel.com/trips/summer-2026/?check=' + Date.now();
-            let navigationError = null;
-            try {
-              await page.goto(url,{waitUntil:'networkidle',timeout:120000});
-              await page.waitForTimeout(2500);
-            } catch(e) { navigationError = String(e); }
-
+            await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+            await page.waitForTimeout(2500);
             const data = await page.evaluate(() => {
-              const q=s=>document.querySelector(s);
-              const qa=s=>[...document.querySelectorAll(s)];
-              const story=q('#story');
-              const tools=q('.toolsIn');
-              const snap=q('.snapshot');
-              const bodyText=document.body.innerText;
-              const firstP=q('#story p');
+              const q=s=>document.querySelector(s), qa=s=>[...document.querySelectorAll(s)];
+              const story=q('#story'), tools=q('.toolsIn');
+              const txt=document.body.innerText;
               return {
-                title: document.title,
+                inlineCSS: !!q('#summer-2026-inline-polish'),
+                inlineJS: !!q('#summer-2026-inline-polish-js'),
+                storyStart: story?.innerText.slice(0,320) || '',
+                dayCards: qa('#story .trip-day-card').length,
+                firstDate: q('#story .dateHead')?.textContent?.trim() || '',
+                firstTitle: q('#story .dayTitle')?.textContent?.trim() || '',
                 bodyWidth: document.body.scrollWidth,
                 viewportWidth: innerWidth,
-                horizontalOverflow: document.body.scrollWidth > innerWidth + 2,
-                cssLoaded: !!q('link[href*="summer-2026-polish.css"]'),
-                jsLoaded: !!q('script[src*="summer-2026-polish.js"]'),
-                storyStart: story ? story.innerText.slice(0,260) : null,
-                dayCards: qa('#story .trip-day-card').length,
-                firstDate: q('#story .dateHead')?.textContent?.trim() || null,
-                firstTitle: q('#story .dayTitle')?.textContent?.trim() || null,
-                firstParagraphFont: firstP ? getComputedStyle(firstP).fontSize : null,
-                firstParagraphLineHeight: firstP ? getComputedStyle(firstP).lineHeight : null,
                 toolsScrollable: tools ? tools.scrollWidth > tools.clientWidth : false,
-                toolsOverflowX: tools ? getComputedStyle(tools).overflowX : null,
-                snapshotDisplay: snap ? getComputedStyle(snap).display : null,
-                snapshotHeight: snap?.getBoundingClientRect().height || null,
-                hasFourCarsText: bodyText.includes('4 רכבים') || bodyText.includes('ארבעה רכבים'),
-                hasFlightsSection: bodyText.includes('פינת הטיסות שלנו'),
-                hasCarsSection: bodyText.includes('פינת הרכבים שלנו'),
-                firstCardRadius: q('.trip-day-card') ? getComputedStyle(q('.trip-day-card')).borderRadius : null
+                hasFourCars: txt.includes('4 רכבים') || txt.includes('ארבעה רכבים'),
+                hasFlights: txt.includes('פינת הטיסות שלנו'),
+                hasCars: txt.includes('פינת הרכבים שלנו')
               };
             });
-
-            data.navigationError = navigationError;
-            data.ok = !data.horizontalOverflow && data.cssLoaded && data.jsLoaded && data.dayCards > 0 && /18 ביולי/.test(data.storyStart||'') && /יוצאים לדרך/.test(data.storyStart||'') && data.hasFourCarsText && data.hasFlightsSection && data.hasCarsSection;
-            require('fs').writeFileSync('_diagnostics/summer-2026-mobile.json', JSON.stringify(data,null,2));
-            await page.screenshot({path:'_diagnostics/summer-2026-mobile.png',fullPage:true});
+            console.log(JSON.stringify(data,null,2));
+            const ok = data.inlineCSS && data.inlineJS && data.dayCards > 0 && /18 ביולי/.test(data.storyStart) && /יוצאים לדרך/.test(data.storyStart) && data.bodyWidth <= data.viewportWidth + 2 && data.hasFourCars && data.hasFlights && data.hasCars;
             await browser.close();
-            if(!data.ok){ console.error(data); process.exit(2); }
+            if(!ok) process.exit(2);
           })();
           JS
           node /tmp/check.js
-
-      - name: Save mobile verification report
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add _diagnostics/summer-2026-mobile.json _diagnostics/summer-2026-mobile.png || true
-          if ! git diff --cached --quiet; then
-            git commit -m "Save Summer 2026 mobile verification"
-            git push
-          fi
