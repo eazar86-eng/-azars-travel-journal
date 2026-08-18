@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -37,7 +37,7 @@ jobs:
           new = "const tripStart=main.indexOf('**מוצאי שבת, 18 ביולי**');const journal=tripStart>=0?main.slice(tripStart):main;render(journal,root);render(day17,root);"
           if old in s:
               s = s.replace(old, new, 1)
-          s = s.replace('20260817full6', '20260818full8', 1)
+          s = s.replace('20260817full6', '20260818full9', 1)
           p.write_text(s, encoding='utf-8')
           PY
 
@@ -56,8 +56,8 @@ jobs:
           from pathlib import Path
           p = Path('_site/trips/summer-2026/index.html')
           s = p.read_text(encoding='utf-8')
-          css = '<link rel="stylesheet" href="/assets/css/summer-2026-polish.css?v=20260818mag1">'
-          js = '<script defer src="/assets/js/summer-2026-polish.js?v=20260818mag1"></script>'
+          css = '<link rel="stylesheet" href="/assets/css/summer-2026-polish.css?v=20260818mag2">'
+          js = '<script defer src="/assets/js/summer-2026-polish.js?v=20260818mag2"></script>'
           if css not in s:
               s = s.replace('</head>', css + js + '</head>', 1)
           p.write_text(s, encoding='utf-8')
@@ -78,3 +78,84 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  verify-mobile:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify live mobile page
+        run: |
+          mkdir -p _diagnostics
+          cat > /tmp/check.js <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage({viewport:{width:390,height:844}, deviceScaleFactor:1});
+            const url = 'https://azarstravel.com/trips/summer-2026/?check=' + Date.now();
+            let error = null;
+            try {
+              await page.goto(url,{waitUntil:'networkidle',timeout:120000});
+              await page.waitForTimeout(2500);
+            } catch(e) { error = String(e); }
+            const data = await page.evaluate(() => {
+              const q=s=>document.querySelector(s);
+              const qa=s=>[...document.querySelectorAll(s)];
+              const story=q('#story');
+              const firstP=q('#story p');
+              const tools=q('.toolsIn');
+              const snap=q('.snapshot');
+              const bodyText=document.body.innerText;
+              return {
+                title: document.title,
+                href: location.href,
+                bodyWidth: document.body.scrollWidth,
+                viewportWidth: innerWidth,
+                horizontalOverflow: document.body.scrollWidth > innerWidth + 2,
+                cssLoaded: !!q('link[href*="summer-2026-polish.css"]'),
+                jsLoaded: !!q('script[src*="summer-2026-polish.js"]'),
+                storyStart: story ? story.innerText.slice(0,220) : null,
+                dayCards: qa('#story .trip-day-card').length,
+                firstDate: q('#story .dateHead')?.textContent?.trim() || null,
+                firstTitle: q('#story .dayTitle')?.textContent?.trim() || null,
+                firstParagraphFont: firstP ? getComputedStyle(firstP).fontSize : null,
+                firstParagraphLineHeight: firstP ? getComputedStyle(firstP).lineHeight : null,
+                toolsClientWidth: tools?.clientWidth || null,
+                toolsScrollWidth: tools?.scrollWidth || null,
+                toolsOverflowX: tools ? getComputedStyle(tools).overflowX : null,
+                snapshotDisplay: snap ? getComputedStyle(snap).display : null,
+                snapshotHeight: snap?.getBoundingClientRect().height || null,
+                hasFourCarsText: bodyText.includes('4 רכבים') || bodyText.includes('ארבעה רכבים'),
+                hasFlightsSection: bodyText.includes('פינת הטיסות שלנו'),
+                hasCarsSection: bodyText.includes('פינת הרכבים שלנו'),
+                firstCardRadius: q('.trip-day-card') ? getComputedStyle(q('.trip-day-card')).borderRadius : null
+              };
+            });
+            data.navigationError=error;
+            data.ok = !data.horizontalOverflow && data.cssLoaded && data.jsLoaded && data.dayCards > 0 && /18 ביולי/.test(data.storyStart||'') && data.hasFourCarsText && data.hasFlightsSection && data.hasCarsSection;
+            require('fs').writeFileSync('_diagnostics/summer-2026-mobile.json', JSON.stringify(data,null,2));
+            await page.screenshot({path:'_diagnostics/summer-2026-mobile.png',fullPage:true});
+            await browser.close();
+            if(!data.ok){ console.error(data); process.exit(2); }
+          })();
+          JS
+          node /tmp/check.js
+
+      - name: Save verified mobile report
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _diagnostics/summer-2026-mobile.json _diagnostics/summer-2026-mobile.png || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Summer 2026 mobile verification [skip ci]"
+            git push
+          fi
