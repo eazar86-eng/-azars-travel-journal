@@ -38,5 +38,6 @@ function render(md){let current=null,expectTitle=false;for(const raw of md.split
 Promise.all([fetch('/content/summer-2026.md?v=20260818magazine3').then(r=>{if(!r.ok)throw Error();return r.text()}),fetch('/content/day-1708.md?v=20260818magazine3').then(r=>r.ok?r.text():'')]).then(([main,last])=>{loading.remove();const start=main.search(/\*\*מוצאי שבת,? 18 ביולי\*\*/);render(start>=0?main.slice(start):main);if(last)render(last);if(location.hash)setTimeout(()=>document.querySelector(location.hash)?.scrollIntoView(),80)}).catch(()=>{loading.textContent='לא הצלחנו לטעון את היומן. נסו לרענן את העמוד.'});
 </script>
 <script src="/assets/js/summer-2026-realcars-v13.js"></script>
+<script src="/assets/js/summer-2026-journal-v14.js?v=20260819b"></script>
 </body>
 </html>
