@@ -1,12 +1,12 @@
 trip_name: "מסע קיץ 2026"
 current_region: "לוס אנג׳לס"
 current_island: "לוס אנג׳לס"
-current_day: "17.08"
-current_day_anchor: "day-1708"
-current_day_title: "האימון עם Jordan Lawley וסנטה מוניקה"
-current_summary: "הפרק האחרון במסע קיץ 2026 היה אחד הימים שחיכינו להם במיוחד בלוס אנג׳לס: אריאל באימון של שלוש שעות עם Jordan Lawley, בזמן שסיגל, נויה ועומרי ניצלו את הזמן לשופינג ב South Coast Plaza. את היום סגרנו בסנטה מוניקה."
-current_page: "/trips/summer-2026/day-1708/"
-version: "20260817jordan-pagesfix1"
+current_day: "18.08"
+current_day_anchor: "day-1808"
+current_day_title: "היום האחרון בלוס אנג׳לס"
+current_summary: "היום האחרון בלוס אנג׳לס כלל אימון נוסף של אריאל עם Jordan Lawley, קניות והשלמות אחרונות ב Irvine Spectrum וב The Outlets at Orange, חזרה למלון לאריזות וארוחת ערב מצוינת ב JW’s Steakhouse לפני הטיסה הביתה."
+current_page: "/trips/summer-2026/day-1808/"
+version: "20260818-last-la-day"
 destinations:
   - { id: "new-york", label: "ניו יורק" }
   - { id: "seattle", label: "סיאטל" }
