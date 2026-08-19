@@ -1,0 +1,36 @@
+name: Add journal v14
+on:
+  push:
+    paths:
+      - '.github/workflows/add-journal-v14.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add journal enhancement script
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('trips/summer-2026/index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="/assets/js/summer-2026-journal-v14.js?v=20260819"></script>'
+          if tag not in s:
+              s=s.replace('</body>',tag+'\n</body>')
+          p.write_text(s,encoding='utf-8')
+      - name: QA
+        run: |
+          node --check assets/js/summer-2026-journal-v14.js
+          grep -q 'summer-2026-journal-v14.js' trips/summer-2026/index.html
+          grep -q 'שלישי, 18/08/2026' content/day-1808.md
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trips/summer-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish August 18 journal and complete date labels'
+          git push
