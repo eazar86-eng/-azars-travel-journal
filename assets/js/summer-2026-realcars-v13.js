@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '20260818realcars13';
+  const VERSION = '20260819dates15';
   const $ = (s, r = document) => r.querySelector(s);
 
   function addStyles() {
@@ -215,7 +215,7 @@
   async function rebuildJournal() {
     const root=$('#story'),loading=$('#loading');if(!root)return;
     try{
-      const files=['0408','0508','0608','0708','0808','0908','1008','1108','1208','1308','1408','1508','1608','1708'];
+      const files=['0408','0508','0608','0708','0808','0908','1008','1108','1208','1308','1408','1508','1608','1708','1808'];
       const [main,...days]=await Promise.all([
         fetch(`/content/summer-2026.md?v=${VERSION}`).then(r=>r.ok?r.text():''),
         ...files.map(d=>fetch(`/content/day-${d}.md?v=${VERSION}`).then(r=>r.ok?r.text():''))
