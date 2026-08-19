@@ -1,0 +1,88 @@
+name: Fix all journal dates v15
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-all-journal-dates-v15.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Normalize August daily headings and include 18 August
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          weekdays={
+            '0408':'יום שלישי','0508':'יום רביעי','0608':'יום חמישי','0708':'יום שישי',
+            '0808':'שבת','0908':'יום ראשון','1008':'יום שני','1108':'יום שלישי',
+            '1208':'יום רביעי','1308':'יום חמישי','1408':'יום שישי','1508':'שבת',
+            '1608':'יום ראשון','1708':'יום שני','1808':'יום שלישי'
+          }
+
+          for code,weekday in weekdays.items():
+              p=Path(f'content/day-{code}.md')
+              if not p.exists():
+                  continue
+              text=p.read_text(encoding='utf-8')
+              lines=text.splitlines()
+              date=f'{code[:2]}/{code[2:]}/2026'
+
+              title=None
+              title_idx=None
+              date_idx=None
+              for i,line in enumerate(lines[:8]):
+                  s=line.strip()
+                  if s.startswith('### ') and (re.search(r'\d{1,2}[/.]\d{1,2}',s) or any(x in s for x in ['אוגוסט','יולי'])):
+                      date_idx=i
+                  if s.startswith('# ') and not s.startswith('### '):
+                      title_idx=i
+                      raw=s[2:].strip()
+                      raw=re.sub(r'^\d{1,2}[/.]\d{1,2}(?:[/.]\d{4})?\s*', '', raw).strip()
+                      title=raw
+                      break
+              if not title:
+                  continue
+
+              remove={x for x in [date_idx,title_idx] if x is not None}
+              body=[line for i,line in enumerate(lines) if i not in remove]
+              while body and not body[0].strip(): body.pop(0)
+              new=f'# {weekday} · {date} | {title}\n\n'+'\n'.join(body).rstrip()+'\n'
+              p.write_text(new,encoding='utf-8')
+
+          js=Path('assets/js/summer-2026-realcars-v13.js')
+          s=js.read_text(encoding='utf-8')
+          s=s.replace("const VERSION = '20260818realcars13';", "const VERSION = '20260819dates15';")
+          s=s.replace("'1608','1708']", "'1608','1708','1808']")
+          js.write_text(s,encoding='utf-8')
+
+          page=Path('trips/summer-2026/index.html')
+          h=page.read_text(encoding='utf-8')
+          h=h.replace('/assets/js/summer-2026-realcars-v13.js','/assets/js/summer-2026-realcars-v13.js?v=20260819dates15')
+          # Avoid repeated query strings if workflow is rerun.
+          h=h.replace('?v=20260819dates15?v=20260819dates15','?v=20260819dates15')
+          page.write_text(h,encoding='utf-8')
+      - name: QA
+        run: |
+          set -e
+          node --check assets/js/summer-2026-realcars-v13.js
+          grep -q "'1808'" assets/js/summer-2026-realcars-v13.js
+          grep -q '20260819dates15' assets/js/summer-2026-realcars-v13.js
+          grep -q '^# יום שישי · 14/08/2026 | ' content/day-1408.md
+          grep -q '^# שבת · 15/08/2026 | ' content/day-1508.md
+          grep -q '^# יום ראשון · 16/08/2026 | ' content/day-1608.md
+          grep -q '^# יום שני · 17/08/2026 | ' content/day-1708.md
+          grep -q '^# יום שלישי · 18/08/2026 | ' content/day-1808.md
+          grep -q 'summer-2026-realcars-v13.js?v=20260819dates15' trips/summer-2026/index.html
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189822+github-actions[bot]@users.noreply.github.com'
+          git add content/day-*.md assets/js/summer-2026-realcars-v13.js trips/summer-2026/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Normalize dates across Summer 2026 journal and add August 18'
+          git push
