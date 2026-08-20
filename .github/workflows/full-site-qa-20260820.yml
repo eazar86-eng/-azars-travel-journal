@@ -1,0 +1,129 @@
+name: Full site QA 2026-08-20
+on:
+  push:
+    paths:
+      - '.github/workflows/full-site-qa-20260820.yml'
+permissions:
+  contents: write
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run full site QA
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, collections
+
+          root=Path('.')
+          report=[]
+          htmls=[p for p in root.rglob('*.html') if '.git' not in p.parts]
+          public=[p for p in htmls if '.github' not in p.parts and 'tmp' not in p.parts]
+          report.append('AZARSTRAVEL FULL QA REPORT')
+          report.append('Date: 2026-08-20')
+          report.append(f'HTML pages checked: {len(public)}')
+
+          issues=[]
+          warnings=[]
+          refs=[]
+          image_refs=[]
+
+          def exists(ref):
+              ref=ref.split('#',1)[0].split('?',1)[0]
+              if not ref or ref.startswith(('http://','https://','mailto:','tel:','javascript:','data:','#','//')): return True
+              if not ref.startswith('/'): return True
+              p=root/ref.lstrip('/')
+              return p.exists() or (p/'index.html').exists()
+
+          for p in public:
+              try:t=p.read_text(encoding='utf-8')
+              except Exception as e:
+                  issues.append(f'UNREADABLE {p}: {e}'); continue
+              low=t.lower()
+              if '<title>' not in low: issues.append(f'MISSING TITLE {p}')
+              if 'name="description"' not in low and "name='description'" not in low: warnings.append(f'MISSING DESCRIPTION {p}')
+              if 'rel="canonical"' not in low and "rel='canonical'" not in low: warnings.append(f'MISSING CANONICAL {p}')
+              if 'property="og:title"' not in low: warnings.append(f'MISSING OG TITLE {p}')
+              if 'property="og:image"' not in low: warnings.append(f'MISSING OG IMAGE {p}')
+              if '\ufffd' in t: issues.append(f'ENCODING REPLACEMENT CHAR {p}')
+              for ref in re.findall(r'(?:href|src)=["\']([^"\']+)',t,re.I):
+                  refs.append((p,ref))
+                  if not exists(ref): issues.append(f'BROKEN REF {p} -> {ref}')
+                  if ref.lower().split('?',1)[0].endswith(('.jpg','.jpeg','.png','.webp','.gif','.svg')):
+                      image_refs.append((p,ref.split('?',1)[0]))
+
+          # Markdown image refs
+          for p in [Path('content/summer-2026.md')]+list(Path('content').glob('day-*.md')):
+              if not p.exists(): continue
+              t=p.read_text(encoding='utf-8')
+              if '\ufffd' in t: issues.append(f'ENCODING REPLACEMENT CHAR {p}')
+              for ref in re.findall(r'!\[[^\]]*\]\((/[^)]+)\)',t):
+                  image_refs.append((p,ref))
+                  if not exists(ref): issues.append(f'BROKEN IMAGE {p} -> {ref}')
+
+          # Summer 2026 asset inventory and usage
+          assets=[]
+          base=Path('assets/summer-2026')
+          if base.exists():
+              for p in base.rglob('*'):
+                  if p.is_file() and p.suffix.lower() in {'.jpg','.jpeg','.png','.webp','.gif'}:
+                      assets.append('/'+str(p).replace('\\','/'))
+          used=set(ref for _,ref in image_refs)
+          unused=[a for a in assets if a not in used]
+
+          rockies_assets=sorted([a for a in assets if a.startswith('/assets/summer-2026/rockies/')])
+          rockies_used=[a for a in rockies_assets if a in used]
+          rockies_unused=[a for a in rockies_assets if a not in used]
+          nyc_assets=sorted([a for a in assets if a.startswith('/assets/summer-2026/nyc-road/')])
+          nyc_used=[a for a in nyc_assets if a in used]
+
+          # Detect cross-region use of the ambiguous nyc-road folder
+          for p,ref in image_refs:
+              if ref.startswith('/assets/summer-2026/nyc-road/'):
+                  sp=str(p).replace('\\','/')
+                  if '/new-york/' not in sp and '/seattle/' not in sp and sp not in {'content/summer-2026.md'}:
+                      warnings.append(f'NYC-ROAD ASSET USED OUTSIDE NYC/SEATTLE {p} -> {ref}')
+
+          # Key journey date coverage
+          journal=Path('content/summer-2026.md').read_text(encoding='utf-8') if Path('content/summer-2026.md').exists() else ''
+          for label in ['19 ביולי','20 ביולי','21 ביולי','22 ביולי','23 ביולי','24 ביולי','25 ביולי','26 ביולי','27 ביולי','28 ביולי','29 ביולי','30 ביולי','4 באוגוסט','5 באוגוסט','6 באוגוסט','7 באוגוסט','8 באוגוסט','9 באוגוסט','10 באוגוסט','11 באוגוסט','12 באוגוסט','13 באוגוסט','14 באוגוסט','15 באוגוסט','16 באוגוסט','17 באוגוסט','18 באוגוסט','19 באוגוסט']:
+              if label not in journal: warnings.append(f'DATE NOT FOUND IN MASTER JOURNAL: {label}')
+
+          # Specific Rockies/Highway 93 editorial check
+          report.append('')
+          report.append('ROCKIES / HIGHWAY 93 PHOTO QA')
+          report.append(f'Rockies assets total: {len(rockies_assets)}')
+          report.append(f'Rockies assets referenced somewhere: {len(rockies_used)}')
+          report.append(f'Rockies assets currently unused: {len(rockies_unused)}')
+          for a in rockies_unused: report.append(f'UNUSED ROCKIES PHOTO: {a}')
+          report.append(f'NYC-road assets total: {len(nyc_assets)}')
+          report.append(f'NYC-road assets referenced somewhere: {len(nyc_used)}')
+
+          # usage detail for rockies photos
+          usage=collections.defaultdict(list)
+          for p,ref in image_refs: usage[ref].append(str(p).replace('\\','/'))
+          for a in rockies_assets:
+              report.append('ROCKIES PHOTO USAGE: '+a+' -> '+(', '.join(sorted(set(usage[a]))) if usage[a] else 'UNUSED'))
+
+          report.append('')
+          report.append(f'Critical issues: {len(set(issues))}')
+          for x in sorted(set(issues)): report.append('ISSUE: '+x)
+          report.append(f'Warnings: {len(set(warnings))}')
+          for x in sorted(set(warnings)): report.append('WARNING: '+x)
+          report.append(f'Summer 2026 image assets: {len(assets)}')
+          report.append(f'Summer 2026 image assets unused by HTML/Markdown: {len(unused)}')
+          for a in unused[:250]: report.append('UNUSED ASSET: '+a)
+          report.append('STATUS: '+('PASS_WITH_WARNINGS' if not issues else 'NEEDS_FIXES'))
+
+          out=Path('tmp/full-site-qa-report.txt')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text('\n'.join(report)+'\n',encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tmp/full-site-qa-report.txt
+          git commit -m 'Generate full site QA report' || exit 0
+          git push
