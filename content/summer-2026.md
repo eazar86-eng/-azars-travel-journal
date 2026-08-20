@@ -55,13 +55,7 @@
 **נחיתה בניו יורק וגמר גביע העולם**
 ![](/assets/summer-2026/nyc-road/01.jpg)
 
-![](/assets/summer-2026/nyc-road/02.jpg)
 
-![](/assets/summer-2026/nyc-road/03.jpg)
-
-![](/assets/summer-2026/nyc-road/04.jpg)
-
-![](/assets/summer-2026/nyc-road/05.jpg)
 נחתנו בניו יורק בשעה 04:30 בבוקר.
 
 זה היה יום מיוחד גם בלי קשר אלינו. באותו יום התקיים גמר גביע העולם בין ארגנטינה לספרד, והעיר כבר התחילה להתמלא באוהדים, תיירים וחולצות כדורגל.
@@ -191,39 +185,8 @@
 אפשר לקרוא על הרוקייז, לראות סרטונים ולתכנן כל עצירה מראש, אבל שום דבר לא באמת מכין לרגע שבו נכנסים אליהם בפעם הראשונה.
 
 **יום חמישי, 23 ביולי**
-![](/assets/summer-2026/rockies/01.jpg)
 
-![](/assets/summer-2026/rockies/02.jpg)
 
-![](/assets/summer-2026/rockies/03.jpg)
-
-![](/assets/summer-2026/rockies/04.jpg)
-
-![](/assets/summer-2026/rockies/05.jpg)
-
-![](/assets/summer-2026/rockies/06.jpg)
-
-![](/assets/summer-2026/rockies/07.jpg)
-
-![](/assets/summer-2026/rockies/08.jpg)
-
-![](/assets/summer-2026/rockies/09.jpg)
-
-![](/assets/summer-2026/rockies/10.jpg)
-
-![](/assets/summer-2026/rockies/11.jpg)
-
-![](/assets/summer-2026/rockies/12.jpg)
-
-![](/assets/summer-2026/rockies/13.jpg)
-
-![](/assets/summer-2026/rockies/14.jpg)
-
-![](/assets/summer-2026/rockies/15.jpg)
-
-![](/assets/summer-2026/rockies/16.jpg)
-
-![](/assets/summer-2026/rockies/17.jpg)
 **רכבל, רכבת הרים והכניסה לבאנף**
 
 קמנו מוקדם, ירדנו לארוחת הבוקר במלון ויצאנו לכיוון באנף.
@@ -517,6 +480,43 @@ Icefields Parkway שייך לקבוצה השנייה.
 לאחר הארוחה טיילנו כשעה על שפת האגם וחזרנו למלון עייפים, שבעים ומרוצים.
 
 למחרת חיכתה לנו החזרה לארצות הברית והכניסה לפארק גליישר.
+
+
+**גלריית הרוקייז הקנדיים**
+
+![](/assets/summer-2026/rockies/01.jpg)
+
+![](/assets/summer-2026/rockies/02.jpg)
+
+![](/assets/summer-2026/rockies/03.jpg)
+
+![](/assets/summer-2026/rockies/04.jpg)
+
+![](/assets/summer-2026/rockies/05.jpg)
+
+![](/assets/summer-2026/rockies/06.jpg)
+
+![](/assets/summer-2026/rockies/07.jpg)
+
+![](/assets/summer-2026/rockies/08.jpg)
+
+![](/assets/summer-2026/rockies/09.jpg)
+
+![](/assets/summer-2026/rockies/10.jpg)
+
+![](/assets/summer-2026/rockies/11.jpg)
+
+![](/assets/summer-2026/rockies/12.jpg)
+
+![](/assets/summer-2026/rockies/13.jpg)
+
+![](/assets/summer-2026/rockies/14.jpg)
+
+![](/assets/summer-2026/rockies/15.jpg)
+
+![](/assets/summer-2026/rockies/16.jpg)
+
+![](/assets/summer-2026/rockies/17.jpg)
 
 **יום חמישי, 30 ביולי**
 ![](/assets/summer-2026/glacier/01.jpg)
