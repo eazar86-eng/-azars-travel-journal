@@ -65,3 +65,4 @@ jobs:
           git add content/summer-2026.md trips/summer-2026/index.html
           git diff --cached --quiet || git commit -m 'Publish final Summer 2026 closing'
           git push
+# retrigger 2026-08-20 16:30 Israel
