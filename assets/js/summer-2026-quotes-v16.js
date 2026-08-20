@@ -1,0 +1,75 @@
+(() => {
+  const QUOTES = [
+    {
+      match: ['19 ביולי','19/07/2026'],
+      text: 'לא רצינו עוד חופשה. רצינו קיץ שיישאר איתנו הרבה אחרי שהמזוודות ייסגרו.',
+      label: 'פתיחת המסע'
+    },
+    {
+      match: ['24 ביולי','24/07/2026','25 ביולי','25/07/2026'],
+      text: 'יש ימים שבהם הדרך עצמה הופכת ליעד, וכל עיקול בכביש מרגיש כמו עוד עמוד בסיפור.',
+      label: 'מהדרך ברוקייז'
+    },
+    {
+      match: ['4 באוגוסט','04/08/2026','7 באוגוסט','07/08/2026'],
+      text: 'מההרים של קנדה אל האוקיינוס של הוואי, כל מעבר הרגיש כמו התחלה של מסע חדש.',
+      label: 'מההרים אל האוקיינוס'
+    },
+    {
+      match: ['17/08/2026','18/08/2026'],
+      text: 'בסוף נשארים פחות עם רשימת המקומות ויותר עם הרגעים שעברנו יחד.',
+      label: 'לקראת הדרך הביתה'
+    }
+  ];
+
+  function findArticle(matchers, used){
+    const articles=[...document.querySelectorAll('#story .dayMaster')];
+    return articles.find(a=>!used.has(a)&&matchers.some(x=>a.textContent.includes(x)));
+  }
+
+  function makeQuote(q){
+    const aside=document.createElement('aside');
+    aside.className='editorialQuote editorialQuoteV16';
+    aside.setAttribute('aria-label','ציטוט מתוך מסע קיץ 2026');
+    aside.innerHTML=`<div class="quoteRule"></div><p>${q.text}</p><small>${q.label} · AZAR’S TRAVEL</small>`;
+    return aside;
+  }
+
+  function addStyles(){
+    if(document.getElementById('summer-quotes-v16-style'))return;
+    const s=document.createElement('style');
+    s.id='summer-quotes-v16-style';
+    s.textContent=`
+      .editorialQuoteV16{margin:64px -10% 68px;padding:34px 10% 36px;text-align:center;border:0!important;position:relative;background:transparent}
+      .editorialQuoteV16 .quoteRule{width:54px;height:2px;background:var(--rust);margin:0 auto 20px}
+      .editorialQuoteV16:before{content:'“';display:block;font-family:Georgia,"Times New Roman",serif;font-size:82px;line-height:.58;color:var(--rust);margin-bottom:18px}
+      .editorialQuoteV16 p{font-family:Georgia,"Times New Roman",serif!important;font-size:clamp(30px,4.7vw,48px)!important;line-height:1.34!important;color:var(--ink)!important;margin:0 auto!important;max-width:980px;font-weight:700}
+      .editorialQuoteV16 small{display:block;margin-top:18px;color:var(--rust);font-size:10px;font-weight:950;letter-spacing:.13em}
+      @media(max-width:650px){.editorialQuoteV16{margin:46px 0 50px;padding:28px 6px 30px}.editorialQuoteV16:before{font-size:66px}.editorialQuoteV16 p{font-size:29px!important}.editorialQuoteV16 small{font-size:9px}}
+    `;
+    document.head.appendChild(s);
+  }
+
+  function placeQuotes(){
+    const root=document.getElementById('story');
+    if(!root||!root.querySelector('.dayMaster'))return false;
+    root.querySelectorAll('.editorialQuote').forEach(x=>x.remove());
+    const used=new Set();
+    QUOTES.forEach(q=>{
+      let article=findArticle(q.match,used);
+      if(!article){
+        const all=[...root.querySelectorAll('.dayMaster')].filter(a=>!used.has(a));
+        article=all[Math.min(all.length-1,Math.floor((used.size+1)*all.length/(QUOTES.length+1)))];
+      }
+      if(article){used.add(article);article.insertAdjacentElement('afterend',makeQuote(q));}
+    });
+    return true;
+  }
+
+  addStyles();
+  let tries=0;
+  const timer=setInterval(()=>{
+    tries++;
+    if(placeQuotes()||tries>80)clearInterval(timer);
+  },150);
+})();
