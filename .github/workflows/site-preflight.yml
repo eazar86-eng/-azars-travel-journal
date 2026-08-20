@@ -1,0 +1,149 @@
+name: Site preflight
+on:
+  push:
+    paths:
+      - '.github/workflows/site-preflight.yml'
+permissions:
+  contents: write
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare site for sharing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          from urllib.parse import urlparse
+
+          root = Path('.')
+          today = '2026-08-20'
+          report = []
+          changed = []
+
+          def write_if_changed(path, text):
+              p = Path(path)
+              old = p.read_text(encoding='utf-8') if p.exists() else ''
+              if old != text:
+                  p.write_text(text, encoding='utf-8')
+                  changed.append(str(p))
+
+          # 1. Close the Summer 2026 journal, with the children's quotes woven through the ending.
+          journal = Path('content/summer-2026.md')
+          if journal.exists():
+              s = journal.read_text(encoding='utf-8')
+              marker = '**סוף המסע, חוזרים הביתה**'
+              if marker not in s:
+                  closing = '''\n\n**יום רביעי, 19 באוגוסט**\n\n**סוף המסע, חוזרים הביתה**\n\nאחרי לילה אחרון בלוס אנג'לס, אריזות אחרונות, בדיקות חוזרות של הדרכונים והמזוודות ותחושה שקשה להסביר, הגיע הרגע שבמשך חודש שלם כמעט לא חשבנו עליו: הדרך הביתה.\n\nעלינו על טיסת אל על מלוס אנג'לס לישראל, טיסה ארוכה של כ־13 וחצי שעות. אחרי כל הטיסות, הכבישים, המעברים והימים העמוסים של המסע, דווקא הטיסה האחרונה עברה בנעימים. ישנו, צפינו בסרטים, אכלנו, דיברנו ובעיקר התחלנו לעכל שהמסע הגדול שלנו באמת מגיע לסיומו.\n\nבאחד הרגעים השקטים של הטיסה, כשכבר היה ברור שהמסע מאחורינו, אריאל סיכם את התחושה שלו במשפט פשוט: \"היו בטיול הזה דברים שחלמתי עליהם הרבה זמן, אבל הכי חזק היה לעשות אותם ביחד עם המשפחה.\"\n\n**חודש אחד, חיים שלמים של זיכרונות**\n\nכשיצאנו לדרך ידענו שאנחנו יוצאים לטיול גדול. תכננו מסלול, הזמנו מלונות, סימנו אטרקציות, בנינו לוחות זמנים וניסינו לחשוב כמעט על כל פרט. אבל בדיעבד, הדברים שנשארו איתנו הם לא רק המקומות שסימנו מראש.\n\nנשארו איתנו השעות הארוכות יחד ברכב. הצחוקים במלונות. העייפות בשדות התעופה. הפעמים שבהן התוכנית השתנתה. הנופים שגרמו לכולנו לשתוק לרגע. הארוחות המשפחתיות. הרגעים שבהם הילדים התלהבו ממשהו שלא חשבנו בכלל שיהיה משמעותי. וגם הרגעים הפחות מושלמים, שבסוף הפכו לחלק מהסיפור.\n\nאולי בגלל זה נויה אמרה משהו שתפס בדיוק את התחושה של המסע כולו: \"אני לא חושבת שיש מקום אחד שהוא הכי יפה. בכל פעם שהגענו למקום חדש חשבתי שזה השיא, ואז הגיע המקום הבא.\"\n\nעברנו מניו יורק לסיאטל, מסיאטל אל קנדה והרוקייז, דרך אגמים, הרים וכבישים שנראו כאילו נלקחו מסרט, המשכנו לגליישר, חזרנו לסיאטל, טסנו להוואי, עברנו בין ביג איילנד למאווי וסיימנו את המסע בלוס אנג'לס.\n\nחגגנו בר מצווה, בת מצווה, ארבעים, חמש עשרה שנות נישואים ובעיקר את הדבר שהפך את המסע הזה למה שהוא באמת היה: המשפחה שלנו.\n\nובתוך כל הסיכומים, הזיכרונות והגעגוע שכבר התחיל להיכנס, עומרי דאג להחזיר אותנו מהר מאוד למציאות עם השאלה הכי מתבקשת מבחינתו: \"אז מתי מתחילים לתכנן את הטיול הבא?\"\n\nבסופו של דבר, לא חזרנו עם רשימה של מקומות שביקרנו בהם. חזרנו עם סיפור משפחתי שלם.\n\nוזה בדיוק מה שרצינו ליצור כשפתחנו, כמעט שנה קודם, את המחשב והתחלנו לתכנן.\n\n**מסע קיץ 2026, הסתיים. היומן נסגר. הזיכרונות רק מתחילים.**\n'''
+                  s = s.rstrip() + closing + '\n'
+                  write_if_changed(journal, s)
+
+          # 2. Update sitemap freshness and include the final Los Angeles day.
+          sm = Path('sitemap.xml')
+          if sm.exists():
+              x = sm.read_text(encoding='utf-8')
+              x = re.sub(r'<lastmod>2026-08-18</lastmod>', f'<lastmod>{today}</lastmod>', x)
+              day1808 = 'https://azarstravel.com/trips/summer-2026/day-1808/'
+              if day1808 not in x:
+                  row = f'  <url><loc>{day1808}</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n'
+                  x = x.replace('</urlset>', row + '</urlset>')
+              write_if_changed(sm, x)
+
+          # 3. Refresh RSS feed so friends and crawlers see the completed journey first.
+          feed = Path('feed.xml')
+          if feed.exists():
+              x = feed.read_text(encoding='utf-8')
+              x = re.sub(r'<lastBuildDate>.*?</lastBuildDate>', '<lastBuildDate>Thu, 20 Aug 2026 11:30:00 GMT</lastBuildDate>', x)
+              if 'היום האחרון בלוס אנג׳לס' not in x:
+                  item = '<item><title>היום האחרון בלוס אנג׳לס</title><link>https://azarstravel.com/trips/summer-2026/day-1808/</link><guid>https://azarstravel.com/trips/summer-2026/day-1808/</guid><pubDate>Tue, 18 Aug 2026 22:30:00 GMT</pubDate><description>אימון נוסף עם Jordan Lawley, קניות אחרונות, ארוחת ערב אחרונה וההכנות לחזרה הביתה.</description></item>'
+                  x = x.replace('<item>', item + '<item>', 1)
+              write_if_changed(feed, x)
+
+          # 4. Improve social sharing metadata on the main entry pages.
+          pages = [
+              ('index.html', 'https://azarstravel.com/', 'https://azarstravel.com/assets/summer-2026/rockies/09.jpg'),
+              ('archive/index.html', 'https://azarstravel.com/archive/', 'https://azarstravel.com/assets/summer-2026/rockies/09.jpg'),
+              ('trips/summer-2026/index.html', 'https://azarstravel.com/trips/summer-2026/', 'https://azarstravel.com/assets/summer-2026/rockies/09.jpg'),
+          ]
+          for path, url, image in pages:
+              p = Path(path)
+              if not p.exists():
+                  continue
+              x = p.read_text(encoding='utf-8')
+              if 'property="og:url"' not in x:
+                  x = x.replace('</head>', f'<meta property="og:url" content="{url}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{image}"></head>', 1)
+              elif 'name="twitter:card"' not in x:
+                  x = x.replace('</head>', f'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{image}"></head>', 1)
+              write_if_changed(p, x)
+
+          # 5. Scan all public-facing text for encoding damage and internal broken references.
+          text_exts = {'.html','.md','.xml','.txt','.css','.js'}
+          files = [p for p in root.rglob('*') if p.is_file() and p.suffix.lower() in text_exts and '.git' not in p.parts and '.github/workflows/site-preflight.yml' not in str(p)]
+          replacement_hits = []
+          broken = []
+
+          def route_exists(ref):
+              if not ref.startswith('/') or ref.startswith('//'):
+                  return True
+              ref = ref.split('#',1)[0].split('?',1)[0]
+              if not ref:
+                  return True
+              target = root / ref.lstrip('/')
+              if target.exists():
+                  return True
+              if ref.endswith('/') and (target/'index.html').exists():
+                  return True
+              if not ref.endswith('/') and (root/(ref.lstrip('/') + '/index.html')).exists():
+                  return True
+              return False
+
+          for p in files:
+              try:
+                  t = p.read_text(encoding='utf-8')
+              except Exception:
+                  continue
+              if '\ufffd' in t:
+                  replacement_hits.append(str(p))
+              for ref in re.findall(r'(?:href|src)=[\"\']([^\"\']+)', t, flags=re.I):
+                  if ref.startswith(('http://','https://','mailto:','tel:','javascript:','#','data:')):
+                      continue
+                  if ref.startswith('/') and not route_exists(ref):
+                      broken.append((str(p), ref))
+              for ref in re.findall(r'!\[[^\]]*\]\((/[^)]+)\)', t):
+                  if not route_exists(ref):
+                      broken.append((str(p), ref))
+
+          # 6. Build a concise QA report that can be inspected after the workflow finishes.
+          report.append('AZARSTRAVEL SITE PREFLIGHT')
+          report.append(f'Date: {today}')
+          report.append(f'Files changed automatically: {len(changed)}')
+          for c in changed:
+              report.append(f'CHANGED: {c}')
+          report.append(f'Encoding replacement character files: {len(replacement_hits)}')
+          for h in replacement_hits:
+              report.append(f'ENCODING: {h}')
+          # Deduplicate broken refs
+          seen = set()
+          broken_unique = []
+          for item in broken:
+              if item not in seen:
+                  seen.add(item); broken_unique.append(item)
+          report.append(f'Broken internal references: {len(broken_unique)}')
+          for p, r in broken_unique[:200]:
+              report.append(f'BROKEN: {p} -> {r}')
+          if not replacement_hits and not broken_unique:
+              report.append('STATUS: PASS')
+          else:
+              report.append('STATUS: NEEDS_REVIEW')
+          out = Path('tmp/site-preflight-report.txt')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text('\n'.join(report) + '\n', encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content/summer-2026.md sitemap.xml feed.xml index.html archive/index.html trips/summer-2026/index.html tmp/site-preflight-report.txt
+          git commit -m 'Prepare Azar Travel site for sharing' || exit 0
+          git push
