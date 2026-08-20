@@ -1,0 +1,45 @@
+name: Final share polish
+on:
+  push:
+    paths:
+      - '.github/workflows/final-share-polish.yml'
+permissions:
+  contents: write
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Make archive cards self contained
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('archive/index.html')
+          s=p.read_text(encoding='utf-8')
+          images={
+            'story-florida2018':'/assets/archive-static/florida-cruise-2018/e7006c7f6d86ca54.jpg',
+            'story-georgia2018':'/assets/archive-static/georgia-2018/4bc5e03f140c65d9.jpg',
+            'story-london2019':'/assets/archive-static/london-manchester-2019/85b77ea43c2c9cfc.jpg',
+            'story-nyc2022':'/assets/archive-static/new-york-2022/53688997cc64315f.jpg',
+            'story-storm2022':'/assets/archive-static/florida-storm-2022/c4ad36b65bbcb614.jpg',
+            'story-coast2024':'/assets/archive-static/coast-to-coast-2024/095c0a79df04ee38.jpg',
+          }
+          for key,src in images.items():
+              pattern=rf'(<a class="card"[^>]*data-story="{re.escape(key)}"[^>]*>\s*<div class="photo"><img)([^>]*)(>)'
+              def repl(m):
+                  attrs=re.sub(r'\s+src="[^"]*"','',m.group(2))
+                  attrs=re.sub(r'\s+loading="[^"]*"','',attrs)
+                  return m.group(1)+f' src="{src}" loading="lazy"'+attrs+m.group(3)
+              s=re.sub(pattern,repl,s,count=1)
+          # Remove dependency on the multi megabyte legacy archive just to discover thumbnails.
+          s=re.sub(r'<script>fetch\(\'/archive\.html\?[^<]*?</script>','',s,flags=re.S)
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add archive/index.html
+          git commit -m 'Make archive thumbnails reliable for sharing' || exit 0
+          git push
