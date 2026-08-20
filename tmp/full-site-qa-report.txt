@@ -1,0 +1,119 @@
+AZARSTRAVEL FULL QA REPORT
+Date: 2026-08-20
+HTML pages checked: 20
+
+ROCKIES / HIGHWAY 93 PHOTO QA
+Rockies assets total: 17
+Rockies assets referenced somewhere: 17
+Rockies assets currently unused: 0
+NYC-road assets total: 5
+NYC-road assets referenced somewhere: 3
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/01.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/02.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/03.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/04.jpg -> content/summer-2026.md, trips/summer-2026/rockies/index.html
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/05.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/06.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/07.jpg -> content/summer-2026.md, trips/summer-2026/rockies/index.html
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/08.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/09.jpg -> archive/index.html, content/summer-2026.md, index.html, trips/summer-2026/index.html, trips/summer-2026/rockies/index.html
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/10.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/11.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/12.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/13.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/14.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/15.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/16.jpg -> content/summer-2026.md
+ROCKIES PHOTO USAGE: /assets/summer-2026/rockies/17.jpg -> content/summer-2026.md
+
+Critical issues: 0
+Warnings: 36
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 10 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 11 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 12 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 13 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 14 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 15 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 16 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 17 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 18 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 6 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 7 באוגוסט
+WARNING: DATE NOT FOUND IN MASTER JOURNAL: 8 באוגוסט
+WARNING: MISSING CANONICAL archive.html
+WARNING: MISSING CANONICAL trips/new-york-2022/index.html
+WARNING: MISSING DESCRIPTION archive.html
+WARNING: MISSING DESCRIPTION trips/new-york-2022/index.html
+WARNING: MISSING OG IMAGE archive.html
+WARNING: MISSING OG IMAGE trips/coast-to-coast-2024/index.html
+WARNING: MISSING OG IMAGE trips/florida-cruise-2018/index.html
+WARNING: MISSING OG IMAGE trips/florida-storm-2022/index.html
+WARNING: MISSING OG IMAGE trips/georgia-2018/index.html
+WARNING: MISSING OG IMAGE trips/london-manchester-2019/index.html
+WARNING: MISSING OG IMAGE trips/new-york-2022/index.html
+WARNING: MISSING OG IMAGE trips/summer-2026/day-1508/index.html
+WARNING: MISSING OG IMAGE trips/summer-2026/day-1608/index.html
+WARNING: MISSING OG IMAGE trips/summer-2026/day-1808/index.html
+WARNING: MISSING OG TITLE archive.html
+WARNING: MISSING OG TITLE trips/coast-to-coast-2024/index.html
+WARNING: MISSING OG TITLE trips/florida-cruise-2018/index.html
+WARNING: MISSING OG TITLE trips/florida-storm-2022/index.html
+WARNING: MISSING OG TITLE trips/georgia-2018/index.html
+WARNING: MISSING OG TITLE trips/london-manchester-2019/index.html
+WARNING: MISSING OG TITLE trips/new-york-2022/index.html
+WARNING: MISSING OG TITLE trips/summer-2026/day-1508/index.html
+WARNING: MISSING OG TITLE trips/summer-2026/day-1608/index.html
+WARNING: NYC-ROAD ASSET USED OUTSIDE NYC/SEATTLE trips/summer-2026/index.html -> /assets/summer-2026/nyc-road/01.jpg
+Summer 2026 image assets: 129
+Summer 2026 image assets unused by HTML/Markdown: 50
+UNUSED ASSET: /assets/summer-2026/day-0908/IMG_9859.jpeg
+UNUSED ASSET: /assets/summer-2026/day-0908/466000bf-ab8b-4a51-a3e0-092cf5b6e8a5.JPG
+UNUSED ASSET: /assets/summer-2026/day-0908/all-photos.jpg
+UNUSED ASSET: /assets/summer-2026/day-0908/IMG_9855.jpeg
+UNUSED ASSET: /assets/summer-2026/day-0908/IMG_9882.jpeg
+UNUSED ASSET: /assets/summer-2026/day-0908/0f067c10-bc49-46d3-84ef-1f0daf905680.JPG
+UNUSED ASSET: /assets/summer-2026/day-0908/01.jpg
+UNUSED ASSET: /assets/summer-2026/day-0908/IMG_9849.jpeg
+UNUSED ASSET: /assets/summer-2026/day-0908/IMG_9860.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1008/IMG_9887.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1008/d1a732fe-8c74-4186-80a2-38f366e9ea5e.JPG
+UNUSED ASSET: /assets/summer-2026/day-1008/IMG_9899.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1008/IMG_9889.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1008/d1a732fe-8c74-4186-80a2-38f366e9ea5e (1).JPG
+UNUSED ASSET: /assets/summer-2026/day-1008/30483de7-6f29-4810-8ee4-0997e491f941.JPG
+UNUSED ASSET: /assets/summer-2026/nyc-road/02.jpg
+UNUSED ASSET: /assets/summer-2026/nyc-road/03.jpg
+UNUSED ASSET: /assets/summer-2026/day-1308/above-the-clouds.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1308/maui-last-evening.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1308/maui-to-la.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/982FF92B-2515-4514-8968-9239BF0A8F11.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/51794CB7-CEA6-4F19-9F1F-9F8BD9CBA569.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/15D85A47-8691-47F1-97DD-CBFD6C7A9DAF.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/15432A1A-EA99-40E8-BFFF-5D708A432C33.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/9E09475C-B4AF-48EF-A211-F85090DEBB82.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/7A5AD4BE-F268-420A-B842-71B67AEB1EDC.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/B60CFACE-1AFA-4662-AFF1-03787DF5FF2C.jpeg
+UNUSED ASSET: /assets/summer-2026/day-1208/D716606D-2F2A-4740-957B-DE539A2C1629.jpeg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/05.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/02.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/01.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/08.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/03.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/07.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/04.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-kona/06.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-arrival/05.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-arrival/02.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-arrival/01.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-arrival/03.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-arrival/04.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/05.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/02.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/09.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/01.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/08.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/03.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/07.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/04.jpg
+UNUSED ASSET: /assets/summer-2026/hawaii-volcano/06.jpg
+STATUS: PASS_WITH_WARNINGS
