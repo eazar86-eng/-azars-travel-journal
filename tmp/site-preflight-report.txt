@@ -1,0 +1,12 @@
+AZARSTRAVEL SITE PREFLIGHT
+Date: 2026-08-20
+Files changed automatically: 6
+CHANGED: content/summer-2026.md
+CHANGED: sitemap.xml
+CHANGED: feed.xml
+CHANGED: index.html
+CHANGED: archive/index.html
+CHANGED: trips/summer-2026/index.html
+Encoding replacement character files: 0
+Broken internal references: 0
+STATUS: PASS
