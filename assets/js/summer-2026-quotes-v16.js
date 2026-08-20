@@ -22,6 +22,12 @@
     }
   ];
 
+  const VOICES = [
+    {name:'אריאל',quote:'זה היה טיול שחיבר וגיבש אותנו כמשפחה.'},
+    {name:'נויה',quote:'טיול שלימד אותי להכיר את המשפחה בצורה אחרת, מזווית אחרת ומדהימה.'},
+    {name:'עומרי',quote:'הטיול הכי טוב שהיה לי בחיים.'}
+  ];
+
   function findArticle(matchers, used){
     const articles=[...document.querySelectorAll('#story .dayMaster')];
     return articles.find(a=>!used.has(a)&&matchers.some(x=>a.textContent.includes(x)));
@@ -45,7 +51,21 @@
       .editorialQuoteV16:before{content:'“';display:block;font-family:Georgia,"Times New Roman",serif;font-size:82px;line-height:.58;color:var(--rust);margin-bottom:18px}
       .editorialQuoteV16 p{font-family:Georgia,"Times New Roman",serif!important;font-size:clamp(30px,4.7vw,48px)!important;line-height:1.34!important;color:var(--ink)!important;margin:0 auto!important;max-width:980px;font-weight:700}
       .editorialQuoteV16 small{display:block;margin-top:18px;color:var(--rust);font-size:10px;font-weight:950;letter-spacing:.13em}
-      @media(max-width:650px){.editorialQuoteV16{margin:46px 0 50px;padding:28px 6px 30px}.editorialQuoteV16:before{font-size:66px}.editorialQuoteV16 p{font-size:29px!important}.editorialQuoteV16 small{font-size:9px}}
+      .familyVoicesV16{margin:74px 0 12px;padding-top:40px;border-top:1px solid var(--line)}
+      .familyVoicesV16 header{text-align:center;margin-bottom:28px}
+      .familyVoicesV16 header small{display:block;color:var(--rust);font-size:10px;font-weight:950;letter-spacing:.15em;direction:ltr;margin-bottom:9px}
+      .familyVoicesV16 header h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,6vw,58px);line-height:1.04;margin:0 0 10px;color:var(--ink)}
+      .familyVoicesV16 header p{margin:0;color:var(--muted);font-size:15px;line-height:1.7}
+      .familyVoicesGridV16{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+      .familyVoiceV16{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:26px 22px 24px;min-height:250px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 12px 34px rgba(52,43,32,.04)}
+      .familyVoiceV16:before{content:'“';font-family:Georgia,"Times New Roman",serif;font-size:68px;line-height:.7;color:var(--rust);height:46px}
+      .familyVoiceV16 blockquote{font-family:Georgia,"Times New Roman",serif;font-size:clamp(22px,2.8vw,30px);line-height:1.5;margin:10px 0 22px;color:var(--ink);font-weight:700}
+      .familyVoiceV16 footer{padding:0;border:0;color:var(--rust);font-size:12px;font-weight:950}
+      .familyVoiceV16:last-child{background:var(--deep);color:#fff;border-color:var(--deep)}
+      .familyVoiceV16:last-child blockquote{color:#fff;font-size:clamp(26px,3.2vw,34px)}
+      .familyVoiceV16:last-child footer,.familyVoiceV16:last-child:before{color:#f0c8b7}
+      @media(max-width:760px){.familyVoicesGridV16{grid-template-columns:1fr}.familyVoiceV16{min-height:0}.familyVoiceV16 blockquote{font-size:26px}.familyVoiceV16:last-child blockquote{font-size:30px}}
+      @media(max-width:650px){.editorialQuoteV16{margin:46px 0 50px;padding:28px 6px 30px}.editorialQuoteV16:before{font-size:66px}.editorialQuoteV16 p{font-size:29px!important}.editorialQuoteV16 small{font-size:9px}.familyVoicesV16{margin-top:50px;padding-top:32px}}
     `;
     document.head.appendChild(s);
   }
@@ -66,10 +86,24 @@
     return true;
   }
 
+  function placeFamilyVoices(){
+    const root=document.getElementById('story');
+    if(!root||!root.querySelector('.dayMaster'))return false;
+    document.getElementById('family-voices-v16')?.remove();
+    const section=document.createElement('section');
+    section.id='family-voices-v16';
+    section.className='familyVoicesV16';
+    section.innerHTML=`<header><small>THE JOURNEY THROUGH THEIR EYES</small><h2>המסע דרך העיניים שלהם</h2><p>שלושה משפטים. שלוש נקודות מבט. מסע משפחתי אחד.</p></header><div class="familyVoicesGridV16">${VOICES.map(v=>`<article class="familyVoiceV16"><blockquote>״${v.quote}״</blockquote><footer>${v.name}</footer></article>`).join('')}</div>`;
+    root.appendChild(section);
+    return true;
+  }
+
   addStyles();
   let tries=0;
   const timer=setInterval(()=>{
     tries++;
-    if(placeQuotes()||tries>80)clearInterval(timer);
+    const ok=placeQuotes();
+    if(ok)placeFamilyVoices();
+    if(ok||tries>80)clearInterval(timer);
   },150);
 })();
